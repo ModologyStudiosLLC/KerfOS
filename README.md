@@ -1,19 +1,49 @@
 # Modology Cabinet Designer
 
-## Vision
+> Making professional cabinet fabrication accessible to everyone
+
+[![CI/CD](https://github.com/MJFlanigan5/modology-cabinet-designer/actions/workflows/frontend.yml/badge.svg)](https://github.com/MJFlanigan5/modology-cabinet-designer/actions/workflows/frontend.yml)
+[![Security Scan](https://github.com/MJFlanigan5/modology-cabinet-designer/actions/workflows/frontend.yml/badge.svg)](https://github.com/MJFlanigan5/modology-cabinet-designer/security)
+
+---
+
+## 🎯 Product Vision
 
 Make professional cabinet fabrication accessible to DIYers and small shops by automating the complex parts: design optimization, cut list generation, and hardware sourcing.
 
-## MVP Goals (3-4 months)
+### Target Users
+- **DIY Woodworkers**: Weekend warriors building cabinets for kitchens, bathrooms, vanities
+- **Small Cabinet Shops**: 1-3 person shops that need to speed up quoting and material planning
+- **Makerspaces & FabLabs**: Community spaces that need tools for teaching cabinet design
 
-| Goal | Success Metric |
+---
+
+## 🚀 MVP Features
+
+### Core Features (Must Have)
+| Feature | What it does |
 |---|---|
-| **Functional MVP** | Users can design a cabinet and get a cut list |
-| **Customer validation** | 10 paying customers or 100 free users |
-| **Revenue ready** | Payment integration functional |
-| **Process optimized** | From raw materials to CNC-ready files in <30 mins |
+| **Cabinet Builder UI** | Drag-and-drop cabinet components (boxes, doors, drawers, shelves) |
+| **3D Preview** | Real-time 3D visualization of the cabinet |
+| **Material Library** | Pre-configured materials (plywood, MDF, hardwood) with dimensions |
+| **Cut List Generator** | Optimized 2D cutting plans for sheet goods |
+| **Hardware Finder** | Suggest hinges, slides, screws based on cabinet dimensions |
+| **Pricing Calculator** | Estimate material and hardware costs |
+| **Export Options** | PDF cut list, CSV, DXF for CNC machines |
+| **User Accounts** | Save projects, return later |
 
-## Tech Stack
+### Nice-to-Have (Phase 2)
+| Feature | What it does |
+|---|---|
+| **Project Templates** | Pre-built cabinet designs (kitchen, vanity, bookshelf) |
+| **Waste Optimization** | Bin packing algorithm for sheet goods |
+| **CNC G-code Export** | Direct output for ShopBot, Shapeoko, etc. |
+| **Hardware Integration** | Direct links to suppliers (Rockler, Woodcraft, etc.) |
+| **Collaboration** | Share projects with others |
+
+---
+
+## 🛠️ Tech Stack
 
 | Layer | Technology | Why |
 |---|---|---|
@@ -25,218 +55,148 @@ Make professional cabinet fabrication accessible to DIYers and small shops by au
 | **Authentication** | Clerk or Auth0 | User accounts, SSO ready |
 | **Payment** | Stripe | Industry standard, good docs |
 | **Storage** | AWS S3 or Google Cloud Storage | File storage for exports |
-| **Deployment** | Vercel (frontend) + Railway (backend) | Easy, fast, cheap for MVP |
+| **Deployment** | Cloudflare Pages (frontend) + Railway (backend) | Fast, global CDN, easy deployment |
 
-## CI/CD Pipeline
+---
 
-### Overview
+## 📦 Project Structure
 
-This project uses GitHub Actions for continuous integration and deployment with the following workflows:
+```
+modology-cabinet-designer/
+├── frontend/                 # Next.js 14 frontend
+│   ├── src/
+│   │   ├── app/             # Next.js App Router
+│   │   ├── components/      # React components
+│   │   ├── lib/             # Utilities
+│   │   └── styles/          # Global styles
+│   ├── public/              # Static assets
+│   ├── package.json
+│   ├── tsconfig.json
+│   └── tailwind.config.ts
+├── backend/                  # FastAPI backend
+│   ├── main.py              # Application entry point
+│   ├── api/                 # API routes
+│   ├── models/              # Database models
+│   ├── schemas/             # Pydantic schemas
+│   ├── services/            # Business logic
+│   └── requirements.txt
+├── .github/
+│   └── workflows/
+│       ├── frontend.yml      # Frontend CI/CD
+│       ├── backend.yml       # Backend CI/CD
+│       └── rollback.yml      # Rollback workflow
+└── README.md
+```
 
-| Workflow | Triggers | Purpose |
+---
+
+## 🚢 Deployment
+
+### Frontend (Cloudflare Pages)
+
+The frontend is automatically deployed to Cloudflare Pages using GitHub Actions.
+
+**What happens on push to `main`:**
+1. Lint (ESLint)
+2. Test (Jest)
+3. Build (Next.js)
+4. Security scan (Trivy)
+5. Deploy to Cloudflare Pages production
+6. Verify deployment
+7. Send Slack notification (optional)
+
+**What happens on pull requests:**
+1. Same CI checks
+2. Deploy to Cloudflare Pages preview environment
+3. Comment PR with preview URL
+
+**Manual rollback:**
+- Go to Actions tab → Rollback workflow
+- Select target tag (e.g., `v1.0.1`)
+- Choose component (frontend, backend, or both)
+- Deployment rolls back using Wrangler CLI
+
+### Backend (Railway)
+
+The backend is automatically deployed to Railway using GitHub Actions.
+
+**What happens on push to `backend/main`:**
+1. Lint (Ruff)
+2. Test (Pytest)
+3. Build Docker image
+4. Push to GitHub Container Registry
+5. Deploy to Railway
+6. Run database migrations
+7. Health check
+8. Send Slack notification (optional)
+
+---
+
+## 🔑 Required Secrets
+
+### Frontend (Cloudflare Pages)
+
+| Secret | Description | Where to Get It |
 |---|---|---|
-| **Frontend CI/CD** | Push to `main`/`develop`, PRs | Lint, test, build, scan, deploy frontend to Vercel |
-| **Backend CI/CD** | Push to `main`/`develop`, PRs | Lint, test, scan, build Docker, deploy backend to Railway |
-| **Rollback** | Manual dispatch | Rollback frontend/backend to previous stable tag |
+| `CLOUDFLARE_API_TOKEN` | Cloudflare API token for Wrangler CLI | https://dash.cloudflare.com/profile/api-tokens |
+| `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare Account ID | Cloudflare Dashboard URL (in the URL) |
+| `NEXT_PUBLIC_API_URL` | Backend API URL | Your Railway backend URL |
+| `NEXTAUTH_SECRET` | Random string for NextAuth | `openssl rand -base64 32` |
+| `NEXTAUTH_URL` | Your Cloudflare Pages URL | `https://modology-cabinet-designer.pages.dev` |
+| `CLERK_PUBLISHABLE_KEY` | Clerk publishable key | https://dashboard.clerk.com/ |
+| `CLERK_SECRET_KEY` | Clerk secret key | https://dashboard.clerk.com/ |
 
-### Frontend Pipeline
+**Add secrets here:** https://github.com/MJFlanigan5/modology-cabinet-designer/settings/secrets/actions
 
-**Triggers:**
-- Push to `main` or `develop` branch (frontend changes only)
-- Pull requests to `main` branch
+### Backend (Railway)
 
-**Jobs:**
-1. **Lint** — ESLint on frontend code
-2. **Test** — Jest tests with coverage (uploaded to Codecov)
-3. **Build** — Next.js production build
-4. **Security Scan** — Trivy vulnerability scanner (results uploaded to GitHub Security)
-5. **Deploy Preview** — Deploy to Vercel preview environment on PRs
-6. **Deploy Production** — Deploy to Vercel production on push to main
-
-**Features:**
-- Node.js 18 with npm caching
-- Dependency caching for faster builds
-- Artifact upload for build outputs
-- Slack notifications on deploy success/failure
-- Environment URLs exposed in GitHub Actions UI
-
-### Backend Pipeline
-
-**Triggers:**
-- Push to `main` or `develop` branch (backend changes only)
-- Pull requests to `main` branch
-
-**Jobs:**
-1. **Lint** — Ruff linter on Python code
-2. **Test** — Pytest tests with coverage (uploaded to Codecov)
-3. **Security Scan** — Trivy vulnerability scanner (results uploaded to GitHub Security)
-4. **Build Docker** — Build and push Docker image to GitHub Container Registry
-5. **Deploy Preview** — Deploy to Railway preview environment on PRs
-6. **Deploy Production** — Deploy to Railway production on push to main + run migrations
-
-**Features:**
-- Python 3.11 with pip caching
-- Docker layer caching via GitHub Actions cache
-- Container image push to GHCR with tag (commit SHA)
-- Database migrations on production deploy
-- Slack notifications on deploy success/failure
-
-### Rollback Pipeline
-
-**Triggers:**
-- Manual workflow dispatch (you specify target tag and component)
-
-**Components:**
-- `frontend` — Rollback Vercel to specified tag
-- `backend` — Rollback Railway to specified tag
-- `both` — Rollback both frontend and backend
-
-**Features:**
-- Health check after rollback (curl `/api/health`)
-- Slack notification on rollback completion
-- 30-second sleep for backend to stabilize before health check
-
-## Secrets Required
-
-| Secret | Description | Where to get |
+| Secret | Description | Where to Get It |
 |---|---|---|
-| `VERCEL_TOKEN` | Vercel authentication token | [Vercel Settings → Tokens](https://vercel.com/account/tokens) |
-| `VERCEL_ORG_ID` | Vercel organization ID | [Vercel Project Settings → General](https://vercel.com/your-org/cabinet-designer/settings/general) |
-| `VERCEL_PROJECT_ID_FRONTEND` | Frontend project ID | [Vercel Project Settings → General](https://vercel.com/your-org/cabinet-designer/settings/general) |
-| `RAILWAY_TOKEN` | Railway authentication token | [Railway Account Settings](https://railway.app/account/tokens) |
-| `RAILWAY_DATABASE_URL` | Production database URL | [Railway Project Variables](https://railway.app/project/cabinet-designer/variables) |
-| `SLACK_WEBHOOK_URL` | Slack webhook for notifications | [Slack App → Incoming Webhooks](https://api.slack.com/apps) |
+| `RAILWAY_TOKEN` | Railway authentication token | https://railway.app/account/tokens |
+| `RAILWAY_DATABASE_URL` | Production database URL | Railway Project Variables |
+| `DATABASE_URL` | PostgreSQL connection URL | Railway Project Variables |
+| `STRIPE_SECRET_KEY` | Stripe secret key | https://dashboard.stripe.com/apikeys |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook secret | Stripe Dashboard → Webhooks |
 
-## Setup Instructions
+**Add secrets here:** https://github.com/MJFlanigan5/modology-cabinet-designer/settings/secrets/actions
 
-### 1. Clone the Repository
+### Optional
 
-```bash
-git clone https://github.com/MJFlanigan5/modology-cabinet-designer.git
-cd modology-cabinet-designer
-```
+| Secret | Description |
+|---|---|
+| `SLACK_WEBHOOK_URL` | Slack webhook for notifications |
 
-### 2. Install Dependencies
+---
 
-**Frontend:**
-```bash
-cd frontend
-npm install
-```
-
-**Backend:**
-```bash
-cd backend
-pip install -r requirements.txt
-```
-
-### 3. Configure GitHub Secrets
-
-Go to your repository settings:
-https://github.com/MJFlanigan5/modology-cabinet-designer/settings/secrets/actions
-
-Add all the secrets listed in the table above.
-
-### 4. Configure Vercel Project
-
-1. Create a Vercel account if you don't have one
-2. Import the project from GitHub: https://vercel.com/new
-3. Select the `frontend` directory as root
-4. Get your `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID_FRONTEND`
-5. Add these to GitHub secrets
-
-### 5. Configure Railway Project
-
-1. Create a Railway account if you don't have one
-2. Create a new project: https://railway.app/new
-3. Add a PostgreSQL service
-4. Add a service for the backend (select `backend` directory)
-5. Get your `RAILWAY_TOKEN` from account settings
-6. Get your `RAILWAY_DATABASE_URL` from project variables
-7. Add these to GitHub secrets
-
-### 6. Configure Slack (Optional)
-
-1. Create a Slack app: https://api.slack.com/apps
-2. Enable "Incoming Webhooks"
-3. Create a webhook URL for your desired channel
-4. Add the webhook URL to GitHub secrets as `SLACK_WEBHOOK_URL`
-
-### 7. Run Locally
-
-**Frontend:**
-```bash
-cd frontend
-npm run dev
-```
-
-**Backend:**
-```bash
-cd backend
-uvicorn main:app --reload
-```
-
-## Deployment
-
-### Automatic Deployment
-
-The CI/CD pipelines automatically deploy when you push to the `main` branch:
-
-- **Frontend** → Deploys to Vercel production
-- **Backend** → Deploys to Railway production + runs migrations
-
-### Manual Rollback
-
-To rollback to a previous version:
-
-1. Go to Actions tab: https://github.com/MJFlanigan5/modology-cabinet-designer/actions
-2. Select the "Rollback" workflow
-3. Click "Run workflow"
-4. Select the target tag (e.g., `v1.0.1`)
-5. Choose component: `frontend`, `backend`, or `both`
-6. Click "Run workflow"
-
-## MVP Roadmap
+## 🗓️ Development Phases
 
 ### Phase 1: Foundation (Weeks 1-4)
-
-| Week | Tasks |
-|---|---|
-| 1 | Set up project, Next.js + FastAPI scaffolding, GitHub repo |
-| 2 | Build basic cabinet component library (boxes, doors, drawers) |
-| 3 | Implement 2D cut list generator (basic rectangle packing) |
-| 4 | Add material library and pricing calculator |
+- ✅ Set up project, Next.js + FastAPI scaffolding, GitHub repo
+- ⏳ Build basic cabinet component library (boxes, doors, drawers)
+- ⏳ Implement 2D cut list generator (basic rectangle packing)
+- ⏳ Add material library and pricing calculator
 
 ### Phase 2: Core MVP (Weeks 5-8)
-
-| Week | Tasks |
-|---|---|
-| 5 | Implement 3D preview with Three.js |
-| 6 | Build hardware finder (basic matching rules) |
-| 7 | Add export functionality (PDF, CSV, DXF) |
-| 8 | Set up user accounts (Clerk/Auth0) and project persistence |
+- ⏳ Implement 3D preview with Three.js
+- ⏳ Build hardware finder (basic matching rules)
+- ⏳ Add export functionality (PDF, CSV, DXF)
+- ⏳ Set up user accounts (Clerk/Auth0) and project persistence
 
 ### Phase 3: Polish & Revenue (Weeks 9-12)
-
-| Week | Tasks |
-|---|---|
-| 9 | Integrate Stripe for payments |
-| 10 | Build pricing page and subscription/paywall |
-| 11 | Add project templates and documentation |
-| 12 | Performance testing, bug fixes, beta launch |
+- ⏳ Integrate Stripe for payments
+- ⏳ Build pricing page and subscription/paywall
+- ⏳ Add project templates and documentation
+- ⏳ Performance testing, bug fixes, beta launch
 
 ### Phase 4: Launch & Iterate (Week 13+)
+- ⏳ Soft launch to 10 beta users
+- ⏳ Collect feedback, iterate quickly
+- ⏳ Public launch, marketing push
+- ⏳ Plan Phase 2 features (CNC export, hardware integration)
 
-| Week | Tasks |
-|---|---|
-| 13 | Soft launch to 10 beta users |
-| 14 | Collect feedback, iterate quickly |
-| 15 | Public launch, marketing push |
-| 16+ | Plan Phase 2 features (CNC export, hardware integration) |
+---
 
-## Revenue Model
-
-### Pricing Options
+## 💰 Pricing Model
 
 | Tier | Features | Price |
 |---|---|---|
@@ -244,10 +204,36 @@ To rollback to a previous version:
 | **Pro** | Unlimited cabinets, CNC export, hardware finder | $15/month |
 | **Lifetime** | All Pro features, one-time payment | $99 |
 
-## Contributing
+---
 
-This is a Modology Studios project. For questions or collaboration, reach out through [modologystudios.com](https://www.modologystudios.com/).
+## 🎨 Modology Brand
 
-## License
+This project is part of **Modology Studios** — a concept design studio making design accessible to everyone.
 
-MIT
+- **Website**: https://www.modologystudios.com/
+- **Philosophy**: "Making Dreams Happen" — we handle complexity so clients can focus on their goals
+- **Services**: Interior Design, Digital Fabrication, CAD, Prototyping, Business Strategy, Ethnographic Research
+
+---
+
+## 🤝 Contributing
+
+Contributions welcome! Please feel free to submit a Pull Request.
+
+---
+
+## 📄 License
+
+MIT License — feel free to use this project for your own cabinet design needs.
+
+---
+
+## 📞 Contact
+
+**Michael Flanigan** — Founder, Modology Studios
+- GitHub: [@MJFlanigan5](https://github.com/MJFlanigan5)
+- Web: https://www.modologystudios.com/
+
+---
+
+**Status**: 🚧 MVP in Development — Target launch: Q2 2025
