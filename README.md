@@ -232,6 +232,11 @@ modology-cabinet-designer/
 │   │   ├── contractor_handoff.py # Professional PDF generation
 │   │   ├── version_history.py   # Design version tracking
 │   │   ├── climate.py           # Climate-based recommendations
+│   │   ├── sketch_to_design.py  # Sketch/photo to 3D model conversion
+│   │   ├── ar_scanner.py        # AR space scanning
+│   │   ├── scratch_build.py     # Scratch build calculator
+│   │   ├── store_integration.py # Home Depot/Lowe's integration
+│   │   ├── community_gallery.py # Community build gallery
 │   │   ├── init_db.py           # Database initialization script
 │   │   └── routers/
 │   │       ├── __init__.py
@@ -257,7 +262,12 @@ modology-cabinet-designer/
 │   │       ├── contractor_handoff.py # Contractor handoff API
 │   │       ├── version_history.py # Version history API
 │   │       ├── climate.py       # Climate adjustment API
-│   │       └── scrap.py         # Scrap tracker endpoints
+│   │       ├── scrap.py         # Scrap tracker endpoints
+│   │       ├── sketch_to_design.py # Sketch to design API
+│   │       ├── ar_scanner.py    # AR scanner API
+│   │       ├── scratch_build.py # Scratch build API
+│   │       ├── store_integration.py # Store integration API
+│   │       └── community_gallery.py # Community gallery API
 │   ├── main.py                 # FastAPI application
 │   ├── requirements.txt         # Python dependencies
 │   ├── fly.toml                # Fly.io deployment config
@@ -293,7 +303,12 @@ modology-cabinet-designer/
 │   │       ├── BragSheet.tsx        # Social media share generator
 │   │       ├── ContractorHandoff.tsx # Professional PDF generator
 │   │       ├── VersionHistory.tsx   # Design version history
-│   │       └── ClimateAdjustment.tsx # Climate-based recommendations
+│   │       ├── ClimateAdjustment.tsx # Climate-based recommendations
+│   │       ├── SketchToDesign.tsx   # Sketch/photo to 3D converter
+│   │       ├── ARScanner.tsx        # AR space scanning
+│   │       ├── ScratchBuildCalculator.tsx # Scratch build calculator
+│   │       ├── StoreIntegration.tsx # Home Depot/Lowe's integration
+│   │       └── CommunityGallery.tsx # Community build gallery
 │   ├── package.json             # NPM dependencies
 │   ├── tsconfig.json           # TypeScript config
 │   ├── tailwind.config.ts       # Tailwind CSS config
@@ -673,6 +688,43 @@ npm test
 - `POST /api/climate/recommendations` - Get climate-based recommendations
 - `GET /api/climate/humidity-zones` - List humidity zones
 
+### Sketch to Design
+- `POST /api/sketch-to-design/upload` - Upload sketch/photo for conversion
+- `POST /api/sketch-to-design/analyze` - Analyze uploaded image
+- `POST /api/sketch-to-design/convert` - Convert to 3D cabinet model
+- `GET /api/sketch-to-design/status/{job_id}` - Get conversion job status
+- `GET /api/sketch-to-design/history` - Get conversion history
+
+### AR Scanner
+- `POST /api/ar-scanner/scan` - Process AR scan data
+- `POST /api/ar-scanner/analyze-space` - Analyze scanned space
+- `GET /api/ar-scanner/suggestions/{scan_id}` - Get cabinet suggestions for space
+- `POST /api/ar-scanner/save-space` - Save scanned space for future reference
+- `GET /api/ar-scanner/spaces` - List saved spaces
+
+### Scratch Build Calculator
+- `POST /api/scratch-build/calculate` - Calculate time and effort estimates
+- `GET /api/scratch-build/tools` - List available tools
+- `POST /api/scratch-build/tools` - Add custom tool
+- `GET /api/scratch-build/techniques/{tool_combo}` - Get techniques for tool combination
+- `GET /api/scratch-build/rental-suggestions` - Get tool rental recommendations
+
+### Store Integration
+- `POST /api/store-integration/check-inventory` - Check store inventory
+- `POST /api/store-integration/add-to-cart` - Add items to cart
+- `GET /api/store-integration/prices/{zip_code}` - Get local store prices
+- `POST /api/store-integration/route-optimize` - Optimize pickup route
+- `GET /api/store-integration/stores/{zip_code}` - List nearby stores
+
+### Community Gallery
+- `GET /api/community-gallery/` - List community builds
+- `POST /api/community-gallery/` - Submit a build
+- `GET /api/community-gallery/{id}` - Get build details
+- `POST /api/community-gallery/{id}/like` - Like a build
+- `POST /api/community-gallery/{id}/comment` - Comment on a build
+- `GET /api/community-gallery/categories` - List build categories
+- `GET /api/community-gallery/featured` - Get featured builds
+
 ### Payments (Stripe)
 - `GET /api/stripe/plans` - Get all subscription plans
 - `POST /api/stripe/create-checkout-session` - Create checkout session
@@ -736,6 +788,11 @@ npm test
 │   - Contractor Handoff                │
 │   - Version History                   │
 │   - Climate Adjustment                │
+│   - Sketch to Design                  │
+│   - AR Scanner                        │
+│   - Scratch Build Calculator          │
+│   - Store Integration                 │
+│   - Community Gallery                 │
 └──────────────┬──────────────────────┘
                │
                │ API calls (same domain)
@@ -760,6 +817,11 @@ npm test
 │   - Contractor Handoff API          │
 │   - Version History API             │
 │   - Climate Adjustment API          │
+│   - Sketch to Design API            │
+│   - AR Scanner API                  │
+│   - Scratch Build API               │
+│   - Store Integration API           │
+│   - Community Gallery API           │
 └──────────────┬──────────────────────┘
                │
                │ DATABASE_URL (same VPC)
@@ -897,9 +959,118 @@ npm test
   - Hardware placement guides and templates
   - Automatic hardware list generation for projects
 
-### Phase 5: User Experience & Woodworker-Focused Features
+### Phase 5: User Experience & Woodworker-Focused Features ✅ COMPLETE
 
-#### ✅ Complete
+#### ✅ Design & Planning
+
+- [x] **Sketch-to-Design Import**
+  - Upload a pencil sketch or photo → AI converts to 3D cabinet model
+  - Perfect for DIYers who think on paper first
+  - Automatic dimension detection
+  - Style recognition (shaker, flat-panel, etc.)
+  - Manual adjustment tools
+  - Image processing and cabinet detection
+  - Multi-cabinet recognition
+  - Confidence scoring for detected elements
+
+- [x] **"What Would Fit?" AR Scanner**
+  - Point phone at a space (garage corner, closet nook)
+  - AR suggests cabinet configurations that maximize storage
+  - Real-time dimension capture
+  - Multiple layout options
+  - Save scanned spaces for future reference
+  - Space analysis and optimization
+  - Cabinet fit suggestions
+  - 3D space visualization
+
+- [x] **Style Presets Gallery**
+  - Shaker, flat-panel, raised-panel, inset doors, face-frame vs frameless
+  - One-click style swap to visualize options
+  - Mix and match styles
+  - Preview with different materials and colors
+  - Community-contributed styles
+  - Style categories (modern, traditional, rustic, contemporary)
+  - Apply to entire project or individual cabinets
+
+- [x] **Design Doctor (Mistake Checker)**
+  - AI checks your design for common mistakes
+  - Unsupported spans detection
+  - Drawer clearance issues
+  - Hardware conflicts
+  - Moisture trap warnings
+  - Suggested fixes with explanations
+  - Severity levels (warning, error, critical)
+  - Auto-fix suggestions where applicable
+
+#### ✅ Materials & Cost
+
+- [x] **"Best Bang for Your Buck" Report**
+  - Analyze design → suggest cheaper alternatives
+  - MDF vs plywood recommendations
+  - Alternative hardware options
+  - Cost/quality tradeoff analysis
+  - Bulk purchasing suggestions
+  - Potential savings breakdown
+  - Quality impact ratings
+
+- [x] **Board Yield Optimizer**
+  - Enter plywood prices from your supplier
+  - Get exact sheets needed
+  - Which cuts to make from which sheet
+  - Minimize waste per board
+  - Visual cut layouts
+  - Waste percentage per sheet
+  - Cost optimization across multiple sheet sizes
+
+- [x] **Home Depot/Lowe's Integration**
+  - One-click "Add to Cart" with local store inventory check
+  - Real-time stock availability
+  - Price comparison between stores
+  - Material pickup route optimization
+  - Store finder by zip code
+  - Shopping list generation
+  - Cart deep links
+
+#### ✅ Sharing & Documentation
+
+- [x] **"Brag Sheet" Generator**
+  - Auto-create shareable before/after posts
+  - Cut list, cost, and time invested
+  - Perfect for social media
+  - Watermark-free images
+  - Multiple platform formats (Instagram, Facebook, Pinterest)
+  - Custom captions and hashtags
+  - Project statistics and achievements
+
+- [x] **Contractor Handoff Mode**
+  - Generate professional PDF
+  - Specs, materials, and hardware list
+  - Send to a cabinetmaker if DIY gets too complex
+  - Include CAD files for professional tools
+  - Contact information templates
+  - Project timeline estimates
+  - Professional formatting and branding
+
+- [x] **Community Build Gallery**
+  - Browse designs others have actually built
+  - Real photos of completed projects
+  - Cost breakdowns
+  - Lessons learned and tips
+  - Rating and comments
+  - Build categories (kitchen, bathroom, garage, etc.)
+  - Featured builds
+  - Search and filter
+
+- [x] **Version History for Builds**
+  - "I modified the pantry design 3 times"
+  - Keep all versions
+  - Notes on why you changed things
+  - Branch and compare versions
+  - Restore previous versions
+  - Version comparison (diff view)
+  - Automatic version naming
+
+#### ✅ Quality of Life
 
 - [x] **Scrap Tracker**
   - Automatically tracks usable offcuts after cuts
@@ -932,69 +1103,14 @@ npm test
   - Personalized recommendations based on location
   - Quick links to popular suppliers
 
-- [x] **Design Doctor (Mistake Checker)**
-  - AI checks your design for common mistakes
-  - Unsupported spans detection
-  - Drawer clearance issues
-  - Hardware conflicts
-  - Moisture trap warnings
-  - Suggested fixes with explanations
-  - Severity levels (warning, error, critical)
-  - Auto-fix suggestions where applicable
-
-- [x] **Style Presets Gallery**
-  - Shaker, flat-panel, raised-panel, inset doors, face-frame vs frameless
-  - One-click style swap to visualize options
-  - Mix and match styles
-  - Preview with different materials and colors
-  - Community-contributed styles
-  - Style categories (modern, traditional, rustic, contemporary)
-  - Apply to entire project or individual cabinets
-
-- [x] **"Best Bang for Your Buck" Report**
-  - Analyze design → suggest cheaper alternatives
-  - MDF vs plywood recommendations
-  - Alternative hardware options
-  - Cost/quality tradeoff analysis
-  - Bulk purchasing suggestions
-  - Potential savings breakdown
-  - Quality impact ratings
-
-- [x] **Board Yield Optimizer**
-  - Enter plywood prices from your supplier
-  - Get exact sheets needed
-  - Which cuts to make from which sheet
-  - Minimize waste per board
-  - Visual cut layouts
-  - Waste percentage per sheet
-  - Cost optimization across multiple sheet sizes
-
-- [x] **"Brag Sheet" Generator**
-  - Auto-create shareable before/after posts
-  - Cut list, cost, and time invested
-  - Perfect for social media
-  - Watermark-free images
-  - Multiple platform formats (Instagram, Facebook, Pinterest)
-  - Custom captions and hashtags
-  - Project statistics and achievements
-
-- [x] **Contractor Handoff Mode**
-  - Generate professional PDF
-  - Specs, materials, and hardware list
-  - Send to a cabinetmaker if DIY gets too complex
-  - Include CAD files for professional tools
-  - Contact information templates
-  - Project timeline estimates
-  - Professional formatting and branding
-
-- [x] **Version History for Builds**
-  - "I modified the pantry design 3 times"
-  - Keep all versions
-  - Notes on why you changed things
-  - Branch and compare versions
-  - Restore previous versions
-  - Version comparison (diff view)
-  - Automatic version naming
+- [x] **Scratch-Build Calculator**
+  - Enter tools you own (table saw, router, etc.)
+  - Get time estimates specific to your setup
+  - Tips and techniques for your tool combination
+  - Tool rental recommendations for specialized cuts
+  - Skill level adjustments
+  - Material-specific time estimates
+  - Alternative tool suggestions
 
 - [x] **Climate Adjustment**
   - Enter your humidity zone
@@ -1004,41 +1120,6 @@ npm test
   - Finish recommendations for your climate
   - Wood acclimation guidelines
   - Climate zone lookup by zip code
-
-#### 📋 Planned
-
-- [ ] **Sketch-to-Design Import**
-  - Upload a pencil sketch or photo → AI converts to 3D cabinet model
-  - Perfect for DIYers who think on paper first
-  - Automatic dimension detection
-  - Style recognition (shaker, flat-panel, etc.)
-  - Manual adjustment tools
-
-- [ ] **"What Would Fit?" AR Scanner**
-  - Point phone at a space (garage corner, closet nook)
-  - AR suggests cabinet configurations that maximize storage
-  - Real-time dimension capture
-  - Multiple layout options
-  - Save scanned spaces for future reference
-
-- [ ] **Scratch-Build Calculator**
-  - Enter tools you own (table saw, router, etc.)
-  - Get time estimates specific to your setup
-  - Tips and techniques for your tool combination
-  - Tool rental recommendations for specialized cuts
-
-- [ ] **Home Depot/Lowe's Integration**
-  - One-click "Add to Cart" with local store inventory check
-  - Real-time stock availability
-  - Price comparison between stores
-  - Material pickup route optimization
-
-- [ ] **Community Build Gallery**
-  - Browse designs others have actually built
-  - Real photos of completed projects
-  - Cost breakdowns
-  - Lessons learned and tips
-  - Rating and comments
 
 ## 🤝 Contributing
 
