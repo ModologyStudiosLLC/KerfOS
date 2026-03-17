@@ -26,17 +26,71 @@ Make professional cabinet fabrication accessible to DIYers and small shops by au
 
 **User Accounts** - Save projects and return later
 
-### Nice-to-Have (Phase 2)
+### ✅ Waste Optimization (Complete)
+
+**2D Bin Packing** - Guillotine-constrained algorithm for sheet goods
+
+**Multi-Sheet Support** - Automatically calculates number of sheets needed
+
+**Waste Percentage** - Shows material utilization efficiency
+
+**Grain Direction** - Respects wood grain orientation
+
+**Edge Banding** - Tracks edge banding requirements
+
+### ✅ CNC G-code Export (Complete)
+
+**Machine Profiles**:
+- **GRBL / Generic** - Standard G-code (.nc)
+- **ShopBot** - SBP format (.sbp)
+- **Shapeoko** - Carbide Motion compatible (.nc)
+- **X-Carve** - Easel compatible (.nc)
+
+**Advanced Features**:
+- **Tabs/Bridges** - Hold-down tabs at configurable spacing
+- **Multiple Pass Depth** - Progressive depth cutting
+- **Drilling Operations** - Peck drilling with dwell times
+- **Lead-in/Lead-out** - Cleaner cut entry/exit
+- **Time Estimation** - Accurate cut time prediction
+- **Feed Rate Control** - Per-operation feed rates
+
+### ✅ Collaboration (Complete)
+
+**User Authentication**:
+- JWT-based authentication
+- Secure password hashing
+- User profiles
+
+**Project Sharing**:
+- Share projects with team members
+- Permission levels: view, edit, admin
+- Public/private project visibility
+
+**Team Features**:
+- Project ownership
+- Shared project dashboard
+- Activity tracking
+
+### ✅ Hardware Integration (Complete)
+
+**Supplier Links**:
+- Rockler
+- Woodcraft
+- Home Depot
+- McMaster-Carr
+
+**Hardware Types**:
+- Hinges (concealed, European, butt)
+- Drawer slides (full extension, soft close)
+- Screws and fasteners
+- Handles and pulls
+- Shelf pins and supports
+
+### Nice-to-Have (Future)
 
 **Project Templates** - Pre-built cabinet designs (kitchen, vanity, bookshelf)
 
-**Waste Optimization** - Bin packing algorithm for sheet goods
-
-**CNC G-code Export** - Direct output for ShopBot, Shapeoko, etc.
-
-**Hardware Integration** - Direct links to suppliers (Rockler, Woodcraft, Home Depot)
-
-**Collaboration** - Share projects with others
+**Payment Integration** - Stripe checkout for premium features
 
 ## 🛠️ Tech Stack
 
@@ -70,16 +124,24 @@ modology-cabinet-designer/
 │   ├── app/
 │   │   ├── __init__.py
 │   │   ├── database.py          # Database configuration
-│   │   ├── models.py            # SQLAlchemy models
+│   │   ├── models.py            # SQLAlchemy models (User, Project, Cabinet, etc.)
+│   │   ├── cutlist_optimizer.py # 2D bin packing with guillotine algorithm
+│   │   ├── gcode_generator.py   # CNC G-code generation (ShopBot, GRBL, etc.)
+│   │   ├── exporters.py         # 3D export (OBJ, STL, DXF, 3MF)
+│   │   ├── chat.py              # AI chat assistant
+│   │   ├── wizard.py            # Guided design wizard
 │   │   ├── init_db.py           # Database initialization script
-│   │   ├── gcode_generator.py   # G-code generation for CNC
 │   │   └── routers/
 │   │       ├── __init__.py
-│   │       ├── cabinets.py       # Cabinet CRUD endpoints
-│   │       ├── materials.py      # Material management
+│   │       ├── auth.py          # User authentication (JWT)
+│   │       ├── collaboration.py # Project sharing and permissions
+│   │       ├── projects.py      # Project management
+│   │       ├── cabinets.py      # Cabinet CRUD endpoints
+│   │       ├── materials.py     # Material management
 │   │       ├── hardware.py      # Hardware inventory with filtering
-│   │       └── cutlists.py      # Cut list generation
-│   ├── main.py                 # FastAPI application with G-code endpoint
+│   │       ├── cutlists.py      # Cut list generation and optimization
+│   │       └── gcode.py         # G-code generation endpoints
+│   ├── main.py                 # FastAPI application
 │   ├── requirements.txt         # Python dependencies
 │   ├── fly.toml                # Fly.io deployment config
 │   └── Dockerfile              # Docker configuration
@@ -90,14 +152,17 @@ modology-cabinet-designer/
 │   │   │   ├── page.tsx         # Home page
 │   │   │   └── globals.css      # Global styles
 │   │   └── components/
+│   │       ├── AuthContext.tsx      # Authentication context provider
 │   │       ├── CabinetBuilder.tsx   # Main UI with 3D preview
 │   │       ├── CabinetPreview.tsx   # Three.js 3D visualization
-│   │       ├── MaterialSelector.tsx  # Material selection with pricing
-│   │       ├── CabinetForm.tsx     # Add cabinets with presets
+│   │       ├── MaterialSelector.tsx # Material selection with pricing
+│   │       ├── CabinetForm.tsx      # Add cabinets with presets
 │   │       ├── DimensionEditor.tsx  # Component management
 │   │       ├── CutListExporter.tsx  # PDF, CSV, DXF, G-code exports
+│   │       ├── GCodeExporter.tsx    # CNC G-code export with machine profiles
 │   │       ├── HardwareFinder.tsx   # Hardware browsing and selection
-│   │       └── GCodeExporter.tsx   # G-code export functionality
+│   │       ├── DesignAssistant.tsx  # AI-powered design helper
+│   │       └── DesignExporter.tsx   # 3D model exports
 │   ├── package.json             # NPM dependencies
 │   ├── tsconfig.json           # TypeScript config
 │   ├── tailwind.config.ts       # Tailwind CSS config
@@ -175,6 +240,7 @@ flyctl secrets set DATABASE_URL="postgresql://postgres:password@xxx-a.db.fly.dev
 |---|---|
 | `DATABASE_URL` | PostgreSQL connection string (auto-set by Fly.io) |
 | `PORT` | 8000 (set by Fly.io automatically) |
+| `SECRET_KEY` | JWT secret key for authentication |
 
 ### Frontend (Vercel)
 
@@ -192,13 +258,18 @@ flyctl secrets set DATABASE_URL="postgresql://postgres:password@xxx-a.db.fly.dev
 
 | Table | Description |
 |---|---|
+| `users` | User accounts with authentication |
+| `projects` | Group cabinets into projects with ownership |
+| `project_shares` | Project sharing with permission levels |
 | `cabinets` | Cabinet designs with dimensions and materials |
 | `materials` | Sheet goods (plywood, MDF, hardwood) with pricing |
 | `hardware` | Cabinet hardware (hinges, slides, handles) |
 | `cabinet_components` | Individual parts of a cabinet |
 | `cut_lists` | Optimized cutting plans for CNC/saw |
 | `cut_items` | Individual cut positions on sheets |
-| `projects` | Group cabinets into projects |
+| `sheets` | Sheet material inventory |
+| `parts` | Individual parts for optimization |
+| `optimization_results` | Stored optimization results |
 
 ## 🦟 Getting Started
 
@@ -330,6 +401,25 @@ npm test
 - `GET /health` - Health check
 - `GET /init-db` - Initialize database tables
 
+### Authentication
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - Login and get JWT token
+- `GET /api/auth/me` - Get current user
+- `PUT /api/auth/me` - Update user profile
+
+### Collaboration
+- `POST /api/collaboration/share` - Share project with user
+- `GET /api/collaboration/shared-with-me` - Get projects shared with me
+- `PUT /api/collaboration/permission/{id}` - Update permission
+- `DELETE /api/collaboration/share/{id}` - Remove share
+
+### Projects
+- `POST /api/projects` - Create project
+- `GET /api/projects` - List my projects
+- `GET /api/projects/{id}` - Get project details
+- `PUT /api/projects/{id}` - Update project
+- `DELETE /api/projects/{id}` - Delete project
+
 ### Cabinets
 - `POST /api/cabinets` - Create cabinet
 - `GET /api/cabinets` - List all cabinets
@@ -358,6 +448,21 @@ npm test
 
 ### G-code
 - `POST /api/gcode` - Generate G-code from cut list
+- `POST /api/gcode/preview` - Preview G-code operations
+- `GET /api/gcode/profiles` - List machine profiles
+- `POST /api/gcode/download` - Download G-code file
+
+### AI Assistant
+- `POST /api/chat` - Chat with AI assistant
+- `POST /api/wizard/start` - Start guided design wizard
+- `POST /api/wizard/next` - Advance wizard step
+- `POST /api/wizard/select` - Make wizard selection
+
+### 3D Export
+- `POST /api/export/obj` - Export as OBJ
+- `POST /api/export/stl` - Export as STL
+- `POST /api/export/3mf` - Export as 3MF
+- `POST /api/export/dxf` - Export as DXF
 
 ## 🔐 GitHub Secrets
 
@@ -400,6 +505,7 @@ npm test
 │   - Cabinets, Materials, Hardware APIs  │
 │   - Cut List Optimizer               │
 │   - G-Code Generator                │
+│   - Auth & Collaboration            │
 └──────────────┬──────────────────────┘
                │
                │ DATABASE_URL (same VPC)
@@ -412,40 +518,9 @@ npm test
 └─────────────────────────────────────────┘
 ```
 
-## 🧹 Cleanup Required
-
-### Files to Delete Manually
-
-The following files were created during development but are no longer needed:
-
-| File | Reason for Deletion |
-|---|---|
-| `render.yaml` | Not using Render anymore (using Fly.io) |
-| `setup-railway.sh` | Not using Railway anymore (using Fly.io) |
-| `setup-render.sh` | Not using Render anymore (using Fly.io) |
-| `setup-fly.sh` | You had issues with this script, using manual deployment |
-
-### How to Delete
-
-**Option 1: Using Git Commands**
-
-```bash
-cd modology-cabinet-designer
-git rm render.yaml setup-railway.sh setup-render.sh setup-fly.sh
-git commit -m "Remove unused deployment files"
-git push
-```
-
-**Option 2: Using GitHub Web UI**
-
-1. Go to your repository on GitHub
-2. Navigate to each file
-3. Click the "..." (three dots) menu
-4. Select "Delete file"
-5. Repeat for all files listed above
-
 ## 🔐 Security
 
+- JWT-based authentication with secure password hashing
 - All endpoints use CORS configuration
 - Database connections use environment variables
 - Input validation via Pydantic
@@ -454,30 +529,47 @@ git push
 
 ## 📈 Roadmap
 
-### Phase 1: MVP (Months 1-2)
+### Phase 1: MVP ✅ COMPLETE
 - [x] Set up GitHub repository
 - [x] Create database models and migrations
 - [x] Implement basic CRUD endpoints
 - [x] Build cabinet builder UI
 - [x] Implement 2D cut list generator
 - [x] Add pricing calculator
+- [x] 3D preview with Three.js
+- [x] Hardware finder with supplier integration
 - [ ] Deploy to Vercel (frontend)
 - [ ] Deploy to Fly.io (backend)
 
-### Phase 2: Advanced Features (Months 3-4)
-- [x] 3D preview with Three.js
-- [ ] Waste optimization algorithm
-- [ ] CNC G-code export
-- [ ] Hardware finder with supplier integration
-- [ ] User accounts and authentication
-- [ ] Payment integration with Stripe
+### Phase 2: Advanced Features ✅ COMPLETE
+- [x] Waste optimization algorithm (2D bin packing with guillotine)
+- [x] CNC G-code export (ShopBot SBP, GRBL, Shapeoko, X-Carve)
+- [x] Tabs/bridges for CNC hold-down
+- [x] Drilling operations
+- [x] Lead-in/lead-out for cleaner cuts
+- [x] User accounts and authentication (JWT)
+- [x] Project collaboration and sharing
+- [x] Permission levels (view, edit, admin)
 
-### Phase 3: Launch & Growth (Month 5+)
+### Phase 3: Launch & Growth (In Progress)
+- [ ] Deploy frontend to Vercel
+- [ ] Deploy backend to Fly.io
 - [ ] Beta launch to 10 users
 - [ ] Collect feedback and iterate
+- [ ] Payment integration with Stripe
 - [ ] Public launch
 - [ ] Marketing and content creation
 - [ ] Plan Phase 4 features
+
+### Phase 4: Future Enhancements
+- [ ] Project templates (kitchen layouts, vanity sets)
+- [ ] Live supplier price feeds
+- [ ] Mobile companion app
+- [ ] Offline mode with sync
+- [ ] Advanced nesting algorithm (non-guillotine)
+- [ ] Multi-material projects
+- [ ] Edge banding optimization
+- [ ] Hardware recommendations based on design
 
 ## 🤝 Contributing
 
