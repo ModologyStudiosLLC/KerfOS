@@ -2,19 +2,19 @@ services:
   - type: web
     name: modology-backend
     env: python
-    region: oregon
     plan: free
+    region: oregon
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
     envVars:
-      - key: PORT
-        value: "8000"
       - key: DATABASE_URL
         value: postgresql://modology_user:zdP5PV1TolY4rzxUv9XMUvykVTL6wIXN@dpg-d6scv42a214c73bv0vug-a/modology
+      - key: PORT
+        value: 8000
       - key: NEXT_PUBLIC_API_URL
-        value: https://modology-backend.onrender.com
+        sync: false
       - key: NEXTAUTH_SECRET
-        value: your-random-secret-key-change-this-in-production
+        generateValue: true
       - key: NEXTAUTH_URL
-        value: https://modology-backend.onrender.com
-    healthCheckPath: /health
+        sync: false
