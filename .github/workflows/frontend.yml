@@ -1,6 +1,6 @@
-# Frontend CI/CD Pipeline (Next.js → Cloudflare Pages)
+# Frontend CI/CD Pipeline (Next.js → Vercel)
 # --------------------------------------------
-# This workflow builds, tests, and deploys the Next.js frontend to Cloudflare Pages.
+# This workflow builds, tests, and deploys the Next.js frontend to Vercel.
 # It runs on push to main (production) and pull requests (preview).
 
 name: Frontend CI/CD
@@ -13,12 +13,6 @@ on:
     branches:
       - main
   workflow_dispatch:
-    inputs:
-      deploy_preview:
-        description: 'Deploy to preview environment'
-        required: false
-        type: boolean
-        default: false
 
 jobs:
   # ====================
@@ -123,7 +117,8 @@ jobs:
         working-directory: ./frontend
         run: npm run build
         env:
-          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL || 'https://api.modology-cabinet-designer.pages.dev' }}
+          # TODO: Update this when backend is deployed to Fly.io
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL || 'https://modology-backend.fly.dev' }}
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -171,37 +166,38 @@ jobs:
     runs-on: ubuntu-latest
     needs: [trivy-scan]
     if: github.event_name == 'pull_request'
+    environment:
+      name: preview
+      url: ${{ steps.deploy.outputs.url }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-build
-          path: frontend/.next
+      - name: Install Vercel CLI
+        run: npm install -g vercel
 
-      - name: Install Wrangler CLI
-        run: npm install -g wrangler
-
-      - name: Deploy to Cloudflare Pages Preview
-        working-directory: ./frontend
+      - name: Pull Vercel Environment Information
+        id: vercel-env
         run: |
-          wrangler pages deploy \
-            .next \
-            --project-name=modology-cabinet-designer \
-            --branch=pr-${{ github.event.pull_request.number }} \
-            --message="PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}"
+          echo "VERCEL_ENVIRONMENT=$(vercel env pull NEXT_PUBLIC_API_URL --environment=preview --token=${{ secrets.VERCEL_TOKEN }}" || echo "VERCEL_ENVIRONMENT=" >> $GITHUB_OUTPUT
+          echo "vercel_url=$(vercel ls --token=${{ secrets.VERCEL_TOKEN }} | jq -r '.[0].url')" >> $GITHUB_OUTPUT
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Vercel Preview
+        id: deploy
+        working-directory: ./frontend
+        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
 
       - name: Comment PR with preview URL
         uses: actions/github-script@v7
         with:
           script: |
-            const previewUrl = `https://pr-${{ github.event.pull_request.number }}.modology-cabinet-designer.pages.dev`;
-            const comment = `🚀 **Preview URL:** ${previewUrl}\n\nThis preview will be available until the PR is closed.`;
+            const previewUrl = `${{ steps.deploy.outputs.url }}`;
+            const comment = `🚀 **Preview URL:** ${previewUrl}\n\nThis preview will be available until the PR is merged.`;
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -219,36 +215,27 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment:
       name: production
-      url: https://modology-cabinet-designer.pages.dev
+      url: ${{ steps.deploy.outputs.url }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-build
-          path: frontend/.next
+      - name: Install Vercel CLI
+        run: npm install -g vercel
 
-      - name: Install Wrangler CLI
-        run: npm install -g wrangler
-
-      - name: Deploy to Cloudflare Pages Production
+      - name: Deploy to Vercel Production
+        id: deploy
         working-directory: ./frontend
-        run: |
-          wrangler pages deploy \
-            .next \
-            --project-name=modology-cabinet-designer \
-            --branch=main \
-            --message="Production deployment: ${{ github.event.head_commit.message }}"
+        run: vercel deploy --prod --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
 
       - name: Verify deployment
         run: |
           sleep 10
-          curl -f https://modology-cabinet-designer.pages.dev || exit 1
+          # TODO: Update with actual Vercel URL after first deployment
+          curl -f https://your-app.vercel.app || exit 1
 
   # ====================
   # Job 7: Slack Notifications
