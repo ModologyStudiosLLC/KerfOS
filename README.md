@@ -74,17 +74,29 @@ Make professional cabinet fabrication accessible to DIYers and small shops by au
 ### ✅ Hardware Integration (Complete)
 
 **Supplier Links**:
-- Rockler
-- Woodcraft
-- Home Depot
-- McMaster-Carr
+- **Rockler** - https://www.rockler.com
+- **Woodcraft** - https://www.woodcraft.com
+- **Home Depot** - https://www.homedepot.com
+- **McMaster-Carr** - https://www.mcmaster.com
+- **Woodworker Express** - https://www.woodworkerexpress.com
+- **DK Hardware** - https://www.dkhardware.com
 
 **Hardware Types**:
-- Hinges (concealed, European, butt)
-- Drawer slides (full extension, soft close)
-- Screws and fasteners
-- Handles and pulls
-- Shelf pins and supports
+- Hinges (concealed, European, butt, piano, pivot, soft-close)
+- Drawer slides (full extension, soft close, under-mount, side-mount)
+- Screws and fasteners (wood, machine, confirmat, pocket-hole, shelf-pin)
+- Handles and pulls (cabinet pull, drawer pull, appliance pull, cup pull, bin pull)
+- Knobs (round, square, t-bar, glass, ceramic)
+- Brackets and supports (corner, shelf, countertop, closet, furniture)
+- Door hardware (catch, latch, magnet, bumper, lift-system)
+- Shelf hardware (pin, bracket, standard, clip, support)
+- Cabinet lighting (LED strip, puck, under-cabinet, motion sensor)
+
+**Features**:
+- Direct search links to all suppliers
+- Price comparison across suppliers
+- Hardware recommendations based on cabinet dimensions
+- Sample hardware database for quick start
 
 ### Nice-to-Have (Future)
 
@@ -138,7 +150,7 @@ modology-cabinet-designer/
 │   │       ├── projects.py      # Project management
 │   │       ├── cabinets.py      # Cabinet CRUD endpoints
 │   │       ├── materials.py     # Material management
-│   │       ├── hardware.py      # Hardware inventory with filtering
+│   │       ├── hardware.py      # Hardware inventory with supplier integration
 │   │       ├── cutlists.py      # Cut list generation and optimization
 │   │       └── gcode.py         # G-code generation endpoints
 │   ├── main.py                 # FastAPI application
@@ -436,9 +448,15 @@ npm test
 
 ### Hardware
 - `POST /api/hardware` - Create hardware
-- `GET /api/hardware?type={type}` - List hardware (optionally filtered by type)
+- `GET /api/hardware?type={type}&supplier={supplier}&search={query}` - List hardware with filters
+- `GET /api/hardware/suppliers` - List all supported suppliers
+- `GET /api/hardware/categories` - Get hardware categories with subtypes
+- `GET /api/hardware/search/{query}` - Get search links for all suppliers
+- `GET /api/hardware/compare/{type}` - Compare prices across suppliers
+- `GET /api/hardware/recommended/{cabinet_type}` - Get hardware recommendations
 - `GET /api/hardware/{id}` - Get hardware by ID
 - `DELETE /api/hardware/{id}` - Delete hardware
+- `POST /api/hardware/seed` - Seed sample hardware data
 
 ### Cut Lists
 - `POST /api/cutlists/generate` - Generate optimized cut list
@@ -550,6 +568,9 @@ npm test
 - [x] User accounts and authentication (JWT)
 - [x] Project collaboration and sharing
 - [x] Permission levels (view, edit, admin)
+- [x] Hardware supplier integration (6 suppliers)
+- [x] Price comparison across suppliers
+- [x] Hardware recommendations
 
 ### Phase 3: Launch & Growth (In Progress)
 - [ ] Deploy frontend to Vercel
@@ -563,7 +584,7 @@ npm test
 
 ### Phase 4: Future Enhancements
 - [ ] Project templates (kitchen layouts, vanity sets)
-- [ ] Live supplier price feeds
+- [ ] Live supplier price feeds via API
 - [ ] Mobile companion app
 - [ ] Offline mode with sync
 - [ ] Advanced nesting algorithm (non-guillotine)
