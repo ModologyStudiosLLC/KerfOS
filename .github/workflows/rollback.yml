@@ -1,0 +1,99 @@
+name: Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_tag:
+        description: 'Tag to rollback to (e.g., v1.0.1)'
+        required: true
+      component:
+        description: 'Component to rollback (frontend, backend, or both)'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+          - frontend
+          - backend
+          - both
+
+jobs:
+  rollback-frontend:
+    name: Rollback Frontend
+    runs-on: ubuntu-latest
+    if: github.event.inputs.component == 'frontend' || github.event.inputs.component == 'both'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ github.event.inputs.target_tag }}
+      - name: Deploy to Vercel
+        id: deploy
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}
+          working-directory: ./frontend
+          vercel-args: '--prod'
+      - name: Health check
+        run: |
+          sleep 10
+          curl -f ${{ steps.deploy.outputs.url }}/api/health || exit 1
+      - name: Notify Slack
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          payload: |
+            {
+              "text": "Frontend rollback completed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "🔄 Frontend rolled back to ${{ github.event.inputs.target_tag }}\n*Triggered by:* ${{ github.actor }}\n*URL:* ${{ steps.deploy.outputs.url }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  rollback-backend:
+    name: Rollback Backend
+    runs-on: ubuntu-latest
+    if: github.event.inputs.component == 'backend' || github.event.inputs.component == 'both'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ github.event.inputs.target_tag }}
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        id: deploy
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          railway up --service=cabinet-designer-backend --environment=production
+      - name: Health check
+        run: |
+          sleep 30
+          curl -f ${{ steps.deploy.outputs.url }}/api/health || exit 1
+      - name: Notify Slack
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          payload: |
+            {
+              "text": "Backend rollback completed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "🔄 Backend rolled back to ${{ github.event.inputs.target_tag }}\n*Triggered by:* ${{ github.actor }}\n*URL:* ${{ steps.deploy.outputs.url }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
