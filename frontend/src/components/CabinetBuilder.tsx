@@ -6,6 +6,8 @@ import MaterialSelector from "./MaterialSelector";
 import DimensionEditor from "./DimensionEditor";
 import CutListExporter from "./CutListExporter";
 import CabinetForm from "./CabinetForm";
+import DesignExporter from "./DesignExporter";
+import DesignAssistant from "./DesignAssistant";
 
 export interface Cabinet {
   id: string;
@@ -39,10 +41,12 @@ export default function CabinetBuilder() {
   const [cabinets, setCabinets] = useState<Cabinet[]>([]);
   const [selectedCabinet, setSelectedCabinet] = useState<Cabinet | null>(null);
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
+  const [showAssistant, setShowAssistant] = useState(false);
 
   const handleAddCabinet = (cabinet: Cabinet) => {
     setCabinets([...cabinets, cabinet]);
     setSelectedCabinet(cabinet);
+    setShowAssistant(false); // Close assistant when cabinet is added
   };
 
   const handleUpdateCabinet = (id: string, updatedCabinet: Partial<Cabinet>) => {
@@ -80,13 +84,48 @@ export default function CabinetBuilder() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column: Builder Controls */}
           <div className="lg:col-span-1 space-y-6">
-            {/* Add New Cabinet */}
+            {/* Design Assistant Toggle */}
             <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
               <h2 className="text-xl font-semibold text-white mb-4">
-                Add Cabinet
+                Design Assistant
               </h2>
-              <CabinetForm onAdd={handleAddCabinet} />
+              <button
+                type="button"
+                onClick={() => setShowAssistant(!showAssistant)}
+                className={`w-full py-3 rounded-lg font-medium transition-all ${
+                  showAssistant
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+                }`}
+              >
+                {showAssistant ? '🤖 Hide Assistant' : '🤖 Show Assistant'}
+              </button>
             </div>
+
+            {/* Design Assistant Panel */}
+            {showAssistant && (
+              <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+                <DesignAssistant
+                  cabinets={cabinets}
+                  onAddCabinet={handleAddCabinet}
+                  onUpdateCabinet={handleUpdateCabinet}
+                  onCabinetSelect={(id) => {
+                    const cabinet = cabinets.find(c => c.id === id);
+                    if (cabinet) setSelectedCabinet(cabinet);
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Add New Cabinet */}
+            {!showAssistant && (
+              <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+                <h2 className="text-xl font-semibold text-white mb-4">
+                  Add Cabinet
+                </h2>
+                <CabinetForm onAdd={handleAddCabinet} />
+              </div>
+            )}
 
             {/* Material Selection */}
             <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
@@ -108,6 +147,11 @@ export default function CabinetBuilder() {
                 cabinets={cabinets}
                 materials={totalMaterials}
               />
+              {selectedCabinet && (
+                <div className="mt-4 pt-4 border-t border-slate-700">
+                  <DesignExporter cabinet={selectedCabinet} />
+                </div>
+              )}
             </div>
           </div>
 
@@ -129,6 +173,7 @@ export default function CabinetBuilder() {
               )}
             </div>
 
+
             {/* Cabinet List */}
             <div className="mt-6 bg-slate-800 rounded-xl p-6 border border-slate-700">
               <h2 className="text-xl font-semibold text-white mb-4">
@@ -140,8 +185,8 @@ export default function CabinetBuilder() {
                     key={cabinet.id}
                     className={`p-4 rounded-lg border transition-all ${
                       selectedCabinet?.id === cabinet.id
-                        ? "bg-blue-600/20 border-blue-500"
-                        : "bg-slate-700/50 border-slate-600 hover:border-slate-500"
+                        ? 'bg-blue-600/20 border-blue-500'
+                        : 'bg-slate-700/50 border-slate-600 hover:border-slate-500'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
