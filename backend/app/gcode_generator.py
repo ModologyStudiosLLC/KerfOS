@@ -1,197 +1,473 @@
 """
-G-code generator for CNC machines
-Generates G-code for ShopBot, Shapeoko, GRBL, and other CNC machines
+G-code Generator for CNC Machines
+
+Supports multiple CNC formats:
+- GRBL / Generic G-code
+- ShopBot SBP
+- Shapeoko (Carbide Motion)
+- X-Carve / Easel
+
+Features:
+- Tabs/bridges for hold-down
+- Multiple pass depth cutting
+- Drilling operations
+- Lead-in/lead-out for cleaner cuts
+- Time estimation
 """
 
-from typing import List, Dict
+from typing import List, Dict, Optional
 from dataclasses import dataclass
+import math
+
 
 @dataclass
-class GCodeConfig:
-    """Configuration for G-code generation"""
-    z_safe_height: float = 5.0  # Height to move to before rapid moves
-    feed_rate: float = 100.0  # Feed rate for cutting (mm/min)
-    plunge_rate: float = 50.0  # Plunge rate (mm/min)
-    rapid_feed: float = 500.0  # Rapid travel feed rate
-    spindle_speed: int = 12000  # RPM
-    material_thickness: float = 18.0  # mm
-    pass_depth: float = 3.0  # Cut depth per pass (mm)
+class CutPath:
+    """A single cut path on the CNC"""
+    points: List[tuple]  # List of (x, y) coordinates
+    depth: float
+    feed_rate: int
+    is_closed: bool = True
+    tabs: List[tuple] = None  # Tab positions
+
+
+@dataclass
+class DrillOperation:
+    """A drilling operation"""
+    x: float
+    y: float
+    depth: float
+    dwell: float = 0.5  # Seconds to dwell at bottom
+    retract_height: float = 0.1  # Height to retract between pecks
+
 
 class GCodeGenerator:
-    """Generate G-code for CNC machines"""
-    
-    def __init__(self, config: GCodeConfig = None):
-        self.config = config or GCodeConfig()
-        self.gcode_lines = []
-        
-    def add_comment(self, comment: str):
-        """Add comment to G-code"""
-        self.gcode_lines.append(f"({comment})")
-        
-    def add_header(self):
-        """Add G-code header"""
-        self.add_comment("Modology Cabinet Designer - G-code for CNC")
-        self.add_comment(f"Generated: {self._get_timestamp()}")
-        self.gcode_lines.append("")  # Empty line
-        self.gcode_lines.append("G20")  # Inch mode
-        self.gcode_lines.append("G90")  # Absolute positioning
-        self.gcode_lines.append("")  # Empty line
-        
-    def add_footer(self):
-        """Add G-code footer"""
-        self.add_comment("End of G-code")
-        self.gcode_lines.append("M05")  # Spindle off
-        self.gcode_lines.append("G00 X0 Y0 Z20")  # Move to home position
-        self.gcode_lines.append("")  # Empty line
-        self.gcode_lines.append("M02")  # Program end
-        
-    def move_to_safe_z(self):
-        """Move Z to safe height"""
-        self.gcode_lines.append(f"G00 Z{self.config.z_safe_height}")
-        
-    def rapid_move(self, x: float, y: float):
-        """Rapid move to X, Y"""
-        self.move_to_safe_z()
-        self.gcode_lines.append(f"G00 X{x:.4f} Y{y:.4f}")
-        
-    def move_to_z(self, z: float):
-        """Move Z to specified position"""
-        self.gcode_lines.append(f"G01 Z{z:.4f} F{self.config.plunge_rate}")
-        
-    def plunge(self):
-        """Plunge into material"""
-        target_z = -self.config.pass_depth
-        self.move_to_z(target_z)
-        
-    def retract(self):
-        """Retract Z to safe height"""
-        self.move_to_safe_z()
-        
-    def spindle_on(self):
-        """Turn on spindle"""
-        self.gcode_lines.append(f"M03 S{self.config.spindle_speed}")
-        self.gcode_lines.append(f"G04 P2")  # Dwell for 2 seconds
-        
-    def spindle_off(self):
-        """Turn off spindle"""
-        self.gcode_lines.append("M05")
-        
-    def set_feed_rate(self, feed: float):
-        """Set feed rate"""
-        self.gcode_lines.append(f"F{feed:.1f}")
-        
-    def cut_line(self, x1: float, y1: float, x2: float, y2: float):
-        """Cut a straight line"""
-        # Rapid to start position
-        self.rapid_move(x1, y1)
-        # Plunge
-        self.spindle_on()
-        self.plunge()
-        # Cut to end position
-        self.set_feed_rate(self.config.feed_rate)
-        self.gcode_lines.append(f"G01 X{x2:.4f} Y{y2:.4f}")
-        # Retract
-        self.retract()
-        self.spindle_off()
-        
-    def cut_rectangle(self, x: float, y: float, width: float, height: float, multiple_passes: bool = False):
-        """Cut a rectangle (pocket or outline)"""
-        x2 = x + width
-        y2 = y + height
-        
-        if multiple_passes:
-            # Pocket cut (multiple passes)
-            num_passes = int(self.config.material_thickness / self.config.pass_depth)
-            pass_depth = self.config.material_thickness / num_passes
-            
-            for pass_num in range(num_passes):
-                current_depth = -((pass_num + 1) * pass_depth)
-                self._cut_rect_at_depth(x, y, x2, y2, current_depth)
-                if pass_num < num_passes - 1:
-                    # Retract between passes
-                    self.move_to_safe_z()
-        else:
-            # Single pass outline cut
-            self._cut_rect_at_depth(x, y, x2, y2, -self.config.material_thickness)
-            
-    def _cut_rect_at_depth(self, x: float, y: float, x2: float, y2: float, depth: float):
-        """Cut rectangle at specific depth"""
-        # Move to start position
-        self.rapid_move(x, y)
-        # Move to depth
-        self.spindle_on()
-        self.gcode_lines.append(f"G01 Z{depth:.4f} F{self.config.plunge_rate}")
-        # Cut rectangle
-        self.gcode_lines.append(f"G01 X{x2:.4f} F{self.config.feed_rate}")
-        self.gcode_lines.append(f"G01 Y{y2:.4f}")
-        self.gcode_lines.append(f"G01 X{x:.4f}")
-        self.gcode_lines.append(f"G01 Y{y:.4f}")
-        # Retract
-        self.move_to_safe_z()
-        self.spindle_off()
-        
-    def cut_sheet_cuts(self, cuts: List[Dict]):
-        """
-        Cut all pieces from a sheet
-        cuts: List of dicts with x, y, width, height, partName
-        """
-        self.add_comment(f"Cutting {len(cuts)} pieces")
-        self.gcode_lines.append("")
-        
-        for i, cut in enumerate(cuts):
-            self.add_comment(f"Piece {i+1}: {cut['partName']}")
-            # Cut rectangle (outline only)
-            self.cut_rectangle(
-                x=cut['x'],
-                y=cut['y'],
-                width=cut['width'],
-                height=cut['height'],
-                multiple_passes=False
-            )
-            # Move to safe position between cuts
-            self.move_to_safe_z()
-            self.gcode_lines.append("")
-            
-    def generate(self, cuts: List[Dict]) -> str:
-        """Generate complete G-code"""
-        self.add_header()
-        self.cut_sheet_cuts(cuts)
-        self.add_footer()
-        return "\n".join(self.gcode_lines)
-        
-    def generate_from_cutlist(self, cutlist_data: Dict) -> str:
-        """Generate G-code from cut list response"""
-        cuts = []
-        for sheet in cutlist_data.get('cutList', []):
-            for cut in sheet.get('cuts', []):
-                cuts.append({
-                    'x': cut['x'],
-                    'y': cut['y'],
-                    'width': cut['width'],
-                    'height': cut['height'],
-                    'partName': f"{cut['partName']}_{cut['partId']}"
-                })
-        return self.generate(cuts)
-        
-    def _get_timestamp(self) -> str:
-        """Get current timestamp"""
-        from datetime import datetime
-        return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-
-def generate_gcode(cutlist_data: Dict, config: GCodeConfig = None) -> str:
     """
-    Generate G-code from cut list data
+    G-code Generator for CNC Routing
+    
+    Generates machine-specific code for cutting optimized layouts.
+    """
+    
+    def __init__(
+        self,
+        machine_type: str = "grbl",
+        feed_rate: int = 120,
+        plunge_rate: int = 30,
+        spindle_speed: int = 18000,
+        safe_height: float = 0.5,
+        cut_depth: float = 0.25,
+        tabs_enabled: bool = True,
+        tab_width: float = 0.5,
+        tab_height: float = 0.125,
+        tab_spacing: float = 6.0,
+        lead_in_distance: float = 0.25,
+        units: str = "inches",
+        material_thickness: float = 0.75
+    ):
+        self.machine_type = machine_type
+        self.feed_rate = feed_rate
+        self.plunge_rate = plunge_rate
+        self.spindle_speed = spindle_speed
+        self.safe_height = safe_height
+        self.cut_depth = cut_depth
+        self.tabs_enabled = tabs_enabled
+        self.tab_width = tab_width
+        self.tab_height = tab_height
+        self.tab_spacing = tab_spacing
+        self.lead_in_distance = lead_in_distance
+        self.units = units
+        self.material_thickness = material_thickness
+        
+        self.total_distance = 0.0
+        self.total_cut_time = 0.0
+    
+    def generate(self, layout_data: List[Dict], sheet_indices: List[int] = None) -> str:
+        """
+        Generate G-code for the given layout.
+        
+        Args:
+            layout_data: List of sheet layouts from optimizer
+            sheet_indices: Optional list of sheet indices to export (empty = all)
+            
+        Returns:
+            G-code string
+        """
+        if not layout_data:
+            return ""
+        
+        sheets_to_export = layout_data
+        if sheet_indices:
+            sheets_to_export = [layout_data[i] for i in sheet_indices if i < len(layout_data)]
+        
+        self.total_distance = 0.0
+        self.total_cut_time = 0.0
+        
+        if self.machine_type == "shopbot":
+            return self._generate_shopbot(sheets_to_export)
+        else:
+            return self._generate_gcode(sheets_to_export)
+    
+    def _generate_gcode(self, sheets: List[Dict]) -> str:
+        """Generate standard G-code (GRBL, Shapeoko, X-Carve)"""
+        lines = []
+        
+        # Header
+        lines.extend(self._gcode_header())
+        
+        for sheet_idx, sheet in enumerate(sheets):
+            lines.append(f"\n; ===== Sheet {sheet_idx + 1} =====")
+            lines.append(f"; Material: {sheet.get('sheet', {}).get('material', 'Unknown')}")
+            sheet_info = sheet.get('sheet', {})
+            lines.append(f"; Size: {sheet_info.get('width', 48)} x {sheet_info.get('length', 96)} inches")
+            lines.append("")
+            
+            parts = sheet.get('parts', [])
+            for part_idx, part in enumerate(parts):
+                lines.extend(self._cut_part_gcode(part, part_idx, sheet_idx))
+        
+        # Footer
+        lines.extend(self._gcode_footer())
+        
+        return "\n".join(lines)
+    
+    def _gcode_header(self) -> List[str]:
+        """Generate G-code header"""
+        return [
+            "; G-code generated by Modology Cabinet Designer",
+            "; Machine: " + self.machine_type.upper(),
+            f"; Feed Rate: {self.feed_rate} in/min",
+            f"; Plunge Rate: {self.plunge_rate} in/min",
+            f"; Spindle: {self.spindle_speed} RPM",
+            f"; Cut Depth/Pass: {self.cut_depth} inches",
+            f"; Material Thickness: {self.material_thickness} inches",
+            f"; Units: {self.units}",
+            f"; Tabs: {'Enabled' if self.tabs_enabled else 'Disabled'}",
+            "",
+            "G90 ; Absolute positioning",
+            "G21 ; Millimeters" if self.units == "mm" else "G20 ; Inches",
+            "G17 ; XY plane selection",
+            "",
+            f"G0 Z{self.safe_height} ; Safe height",
+            f"M3 S{self.spindle_speed} ; Spindle on",
+            "G4 P2 ; Dwell for spindle startup",
+            ""
+        ]
+    
+    def _gcode_footer(self) -> List[str]:
+        """Generate G-code footer"""
+        return [
+            "",
+            f"G0 Z{self.safe_height} ; Safe height",
+            "G0 X0 Y0 ; Return to origin",
+            "M5 ; Spindle off",
+            "M30 ; End program"
+        ]
+    
+    def _cut_part_gcode(self, part: Dict, part_idx: int, sheet_idx: int) -> List[str]:
+        """Generate G-code to cut a single part"""
+        lines = []
+        
+        x = part.get('x', 0)
+        y = part.get('y', 0)
+        width = part.get('width', 0)
+        length = part.get('height', part.get('length', 0))
+        name = part.get('name', f'Part {part_idx + 1}')
+        
+        lines.append(f"; --- {name} ---")
+        lines.append(f"; Position: ({x:.3f}, {y:.3f})")
+        lines.append(f"; Size: {width:.3f} x {length:.3f}")
+        
+        # Calculate cut depth passes
+        total_depth = self.material_thickness
+        passes = max(1, int(math.ceil(total_depth / self.cut_depth)))
+        
+        # Generate rectangle cut path
+        corners = [
+            (x, y),
+            (x + width, y),
+            (x + width, y + length),
+            (x, y + length),
+            (x, y)  # Close the path
+        ]
+        
+        # Generate tabs if enabled
+        tab_positions = []
+        if self.tabs_enabled:
+            tab_positions = self._calculate_tabs(corners)
+        
+        # Cut each pass
+        for pass_num in range(passes):
+            depth = (pass_num + 1) * self.cut_depth
+            if depth > total_depth:
+                depth = total_depth
+            
+            lines.append(f"; Pass {pass_num + 1} - Depth: {depth:.3f}")
+            
+            # Rapid move to start position with lead-in
+            start_x, start_y = corners[0]
+            if self.lead_in_distance > 0:
+                # Lead-in from outside the part
+                lead_in_x = start_x - self.lead_in_distance
+                lines.append(f"G0 X{lead_in_x:.3f} Y{start_y:.3f}")
+            else:
+                lines.append(f"G0 X{start_x:.3f} Y{start_y:.3f}")
+            
+            # Plunge
+            lines.append(f"G1 Z-{depth:.3f} F{self.plunge_rate}")
+            
+            # Move to actual start (lead-in cut)
+            if self.lead_in_distance > 0:
+                lines.append(f"G1 X{start_x:.3f} Y{start_y:.3f} F{self.feed_rate}")
+            
+            # Cut around perimeter
+            for i, (cx, cy) in enumerate(corners[1:], 1):
+                # Check for tab on final pass
+                if self.tabs_enabled and pass_num == passes - 1:
+                    for tab_x, tab_y in tab_positions:
+                        dist_to_tab = math.sqrt((cx - tab_x)**2 + (cy - tab_y)**2)
+                        if dist_to_tab < self.tab_width:
+                            # Raise over tab
+                            lines.append(f"G1 Z-{depth - self.tab_height:.3f} F{self.plunge_rate}")
+                            break
+                
+                lines.append(f"G1 X{cx:.3f} Y{cy:.3f} F{self.feed_rate}")
+            
+            # Lead-out
+            if self.lead_in_distance > 0 and pass_num == passes - 1:
+                lead_out_x = x - self.lead_in_distance
+                lines.append(f"G1 X{lead_out_x:.3f} Y{y:.3f} F{self.feed_rate}")
+            
+            # Retract
+            lines.append(f"G0 Z{self.safe_height}")
+            lines.append("")
+        
+        return lines
+    
+    def _calculate_tabs(self, corners: List[tuple]) -> List[tuple]:
+        """Calculate tab positions along the cut path"""
+        tabs = []
+        
+        for i in range(len(corners) - 1):
+            x1, y1 = corners[i]
+            x2, y2 = corners[i + 1]
+            
+            # Calculate segment length
+            length = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+            
+            # Add tabs at regular intervals
+            num_tabs = max(1, int(length / self.tab_spacing))
+            
+            for t in range(1, num_tabs + 1):
+                ratio = t / (num_tabs + 1)
+                tab_x = x1 + ratio * (x2 - x1)
+                tab_y = y1 + ratio * (y2 - y1)
+                tabs.append((tab_x, tab_y))
+        
+        return tabs
+    
+    def generate_drilling(self, drill_ops: List[DrillOperation]) -> str:
+        """Generate G-code for drilling operations"""
+        lines = [
+            "; --- Drilling Operations ---",
+            f"G0 Z{self.safe_height}",
+            ""
+        ]
+        
+        for i, drill in enumerate(drill_ops):
+            lines.append(f"; Drill hole {i + 1} at ({drill.x:.3f}, {drill.y:.3f})")
+            lines.append(f"G0 X{drill.x:.3f} Y{drill.y:.3f}")
+            lines.append(f"G0 Z{drill.retract_height}")
+            
+            # Peck drilling
+            current_depth = 0
+            while current_depth < drill.depth:
+                current_depth += self.cut_depth
+                if current_depth > drill.depth:
+                    current_depth = drill.depth
+                
+                lines.append(f"G1 Z-{current_depth:.3f} F{self.plunge_rate}")
+                lines.append(f"G4 P{drill.dwell}")
+                lines.append(f"G0 Z{drill.retract_height}")
+            
+            lines.append(f"G0 Z{self.safe_height}")
+            lines.append("")
+        
+        return "\n".join(lines)
+    
+    def _generate_shopbot(self, sheets: List[Dict]) -> str:
+        """Generate ShopBot SBP format"""
+        lines = []
+        
+        # Header
+        lines.extend([
+            "' ShopBot SBP generated by Modology Cabinet Designer",
+            f"' Feed Rate: {self.feed_rate} in/min",
+            f"' Plunge Rate: {self.plunge_rate} in/min",
+            "'",
+            "SA ; Turn on software limits",
+            "SO 1,1 ; Output 1 on (dust collector)",
+            "'",
+            "MS," + str(self.spindle_speed) + " ; Spindle speed",
+            "C3 ; Spindle ON",
+            "PAUSE 3 ; Wait for spindle",
+            "'"
+        ])
+        
+        for sheet_idx, sheet in enumerate(sheets):
+            lines.append(f"' ===== Sheet {sheet_idx + 1} =====")
+            sheet_info = sheet.get('sheet', {})
+            lines.append(f"' Material: {sheet_info.get('material', 'Unknown')}")
+            lines.append("")
+            
+            parts = sheet.get('parts', [])
+            for part_idx, part in enumerate(parts):
+                lines.extend(self._cut_part_shopbot(part, part_idx, sheet_idx))
+        
+        # Footer
+        lines.extend([
+            "'",
+            "C4 ; Spindle OFF",
+            "SO 1,0 ; Output 1 off",
+            "END"
+        ])
+        
+        return "\n".join(lines)
+    
+    def _cut_part_shopbot(self, part: Dict, part_idx: int, sheet_idx: int) -> List[str]:
+        """Generate ShopBot moves for a part"""
+        lines = []
+        
+        x = part.get('x', 0)
+        y = part.get('y', 0)
+        width = part.get('width', 0)
+        length = part.get('height', part.get('length', 0))
+        name = part.get('name', f'Part {part_idx + 1}')
+        
+        lines.append(f"' --- {name} ---")
+        lines.append(f"JZ,{self.safe_height} ; Safe height")
+        lines.append(f"J2,{x:.3f},{y:.3f} ; Move to start")
+        
+        # Calculate passes
+        total_depth = self.material_thickness
+        passes = max(1, int(math.ceil(total_depth / self.cut_depth)))
+        
+        corners = [
+            (x, y),
+            (x + width, y),
+            (x + width, y + length),
+            (x, y + length)
+        ]
+        
+        for pass_num in range(passes):
+            depth = (pass_num + 1) * self.cut_depth
+            if depth > total_depth:
+                depth = total_depth
+            
+            lines.append(f"' Pass {pass_num + 1}")
+            
+            # Plunge
+            lines.append(f"MZ,-{depth:.3f}")
+            
+            # Cut around
+            for cx, cy in corners:
+                lines.append(f"M2,{cx:.3f},{cy:.3f},{self.feed_rate}")
+            
+            lines.append(f"M2,{x:.3f},{y:.3f},{self.feed_rate} ; Close path")
+        
+        lines.append(f"JZ,{self.safe_height} ; Retract")
+        lines.append("")
+        
+        return lines
+    
+    def estimate_time(self, layout_data: List[Dict]) -> float:
+        """Estimate cutting time in minutes"""
+        total_length = 0.0
+        
+        for sheet in layout_data:
+            parts = sheet.get('parts', [])
+            for part in parts:
+                # Perimeter length
+                width = part.get('width', 0)
+                length = part.get('height', part.get('length', 0))
+                perimeter = 2 * (width + length)
+                
+                # Account for multiple passes
+                total_depth = self.material_thickness
+                passes = max(1, int(math.ceil(total_depth / self.cut_depth)))
+                
+                total_length += perimeter * passes
+        
+        # Time = distance / feed rate (inches per minute)
+        time_minutes = total_length / self.feed_rate
+        
+        # Add 20% for rapid moves and setup
+        return round(time_minutes * 1.2, 1)
+
+
+# Machine profiles
+MACHINE_PROFILES = {
+    "grbl": {
+        "name": "GRBL / Generic",
+        "file_extension": ".nc",
+        "default_feed": 120,
+        "default_plunge": 30,
+        "default_spindle": 18000
+    },
+    "shopbot": {
+        "name": "ShopBot",
+        "file_extension": ".sbp",
+        "default_feed": 180,
+        "default_plunge": 60,
+        "default_spindle": 12000
+    },
+    "shapeoko": {
+        "name": "Shapeoko",
+        "file_extension": ".nc",
+        "default_feed": 100,
+        "default_plunge": 40,
+        "default_spindle": 18000
+    },
+    "xcarve": {
+        "name": "X-Carve",
+        "file_extension": ".nc",
+        "default_feed": 80,
+        "default_plunge": 30,
+        "default_spindle": 12000
+    }
+}
+
+
+def generate_gcode(cutlist_data: Dict, config: dict = None) -> str:
+    """
+    Generate G-code from cut list data (backward compatibility)
     
     Args:
         cutlist_data: Cut list response from backend
-        config: Optional G-code configuration
+        config: Optional G-code configuration dict
         
     Returns:
         G-code string
     """
-    generator = GCodeGenerator(config)
-    return generator.generate_from_cutlist(cutlist_data)
+    config = config or {}
+    generator = GCodeGenerator(**config)
+    
+    # Convert cutlist format to layout format
+    layout_data = []
+    for sheet in cutlist_data.get('cutList', []):
+        sheet_parts = []
+        for cut in sheet.get('cuts', []):
+            sheet_parts.append({
+                'x': cut['x'],
+                'y': cut['y'],
+                'width': cut['width'],
+                'height': cut['height'],
+                'name': f"{cut.get('partName', 'Part')}_{cut.get('partId', '')}"
+            })
+        layout_data.append({
+            'sheet': {'width': 48, 'length': 96},
+            'parts': sheet_parts
+        })
+    
+    return generator.generate(layout_data)
 
 
 def generate_gcode_preview(cutlist_data: Dict) -> List[Dict]:
@@ -209,15 +485,15 @@ def generate_gcode_preview(cutlist_data: Dict) -> List[Dict]:
             operations.append({
                 'operation': op_num,
                 'type': 'rect_cut',
-                'name': f"{cut['partName']}_{cut['partId']}",
+                'name': f"{cut.get('partName', 'Part')}_{cut.get('partId', '')}",
                 'x': cut['x'],
                 'y': cut['y'],
                 'width': cut['width'],
                 'height': cut['height'],
-                'sheet': sheet['sheetNumber'],
+                'sheet': sheet.get('sheetNumber', 1),
                 'commands': [
                     f"Rapid to ({cut['x']:.2f}, {cut['y']:.2f})",
-                    f"Plunge to {-18.0:.1f} mm",
+                    f"Plunge to material depth",
                     f"Cut rectangle ({cut['width']:.2f}\" x {cut['height']:.2f}\")",
                     f"Retract Z"
                 ]
