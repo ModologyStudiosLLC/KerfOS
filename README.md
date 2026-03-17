@@ -77,12 +77,27 @@ Make professional cabinet fabrication accessible to DIYers and small shops by au
 - **Rockler** - https://www.rockler.com
 - **Woodcraft** - https://www.woodcraft.com
 - **Home Depot** - https://www.homedepot.com
+- **Lowe's** - https://www.lowes.com
+- **Menards** - https://www.menards.com
+- **Ace Hardware** - https://www.acehardware.com
 - **McMaster-Carr** - https://www.mcmaster.com
+- **Blum** - https://www.blum.com
+- **Häfele** - https://www.hafele.com
+- **Grass** - https://www.grassusa.com
+- **Sugatsune** - https://www.sugatsune.com
+- **Accuride** - https://www.accuride.com
 - **Woodworker Express** - https://www.woodworkerexpress.com
 - **DK Hardware** - https://www.dkhardware.com
 - **CabinetParts.com** - https://www.cabinetparts.com
 - **Woodworker's Hardware** - https://www.wwhardware.com
 - **Hardware Tree** - https://www.hardwaretree.com
+- **Amazon** - https://www.amazon.com
+- **Lee Valley** - https://www.leevalley.com
+- **Kreg** - https://www.kregtool.com
+- **Columbia Forest Products** - https://www.cfpwood.com
+- **Hardwood Store** - https://www.hardwoodstore.com
+- **Bell Forest** - https://www.bellforestproducts.com
+- **Advantage Lumber** - https://www.advantagelumber.com
 
 **Hardware Types**:
 - Hinges (concealed, European, butt, piano, pivot, soft-close)
@@ -100,6 +115,8 @@ Make professional cabinet fabrication accessible to DIYers and small shops by au
 - Price comparison across suppliers
 - Hardware recommendations based on cabinet dimensions
 - Sample hardware database for quick start
+- Recommended suppliers by hardware type
+- Supplier metadata (specialties, price range, notes)
 
 ### ✅ Project Templates (Complete)
 
@@ -148,9 +165,11 @@ Make professional cabinet fabrication accessible to DIYers and small shops by au
 ### ✅ Live Supplier Price Feeds (Complete)
 
 **Supplier Integration**:
-- Rockler, Woodcraft, Home Depot, Lowe's
-- McMaster-Carr, Amazon
-- Woodworker Express, DK Hardware
+- Rockler, Woodcraft, Home Depot, Lowe's, Menards, Ace Hardware
+- McMaster-Carr, Amazon, Lee Valley, Kreg
+- Woodworker Express, DK Hardware, CabinetParts.com
+- Blum, Häfele, Grass, Sugatsune, Accuride
+- Columbia Forest Products, Hardwood Store, Bell Forest, Advantage Lumber
 
 **Features**:
 - Search links across all suppliers
@@ -158,6 +177,7 @@ Make professional cabinet fabrication accessible to DIYers and small shops by au
 - Estimated price ranges by category
 - Hardware category browser
 - Price estimate API
+- Recommended suppliers by category
 
 ## 🛠️ Tech Stack
 
@@ -204,6 +224,14 @@ modology-cabinet-designer/
 │   │   ├── edge_banding.py      # Edge banding optimization
 │   │   ├── hardware_recommendations.py # Design-based hardware suggestions
 │   │   ├── localization.py      # Local supplier search by zip code
+│   │   ├── design_doctor.py     # Design mistake detection
+│   │   ├── style_presets.py     # Style presets gallery
+│   │   ├── cost_optimizer.py    # "Best Bang for Your Buck" cost analysis
+│   │   ├── board_yield.py       # Board yield optimization
+│   │   ├── brag_sheet.py        # Social media share generator
+│   │   ├── contractor_handoff.py # Professional PDF generation
+│   │   ├── version_history.py   # Design version tracking
+│   │   ├── climate.py           # Climate-based recommendations
 │   │   ├── init_db.py           # Database initialization script
 │   │   └── routers/
 │   │       ├── __init__.py
@@ -221,6 +249,14 @@ modology-cabinet-designer/
 │   │       ├── edge_banding.py  # Edge banding endpoints
 │   │       ├── hardware_recommendations.py # Hardware recommendation endpoints
 │   │       ├── localization.py  # Local supplier search API
+│   │       ├── design_doctor.py # Design doctor API
+│   │       ├── style_presets.py # Style presets API
+│   │       ├── cost_optimizer.py # Cost optimizer API
+│   │       ├── board_yield.py   # Board yield API
+│   │       ├── brag_sheet.py    # Brag sheet API
+│   │       ├── contractor_handoff.py # Contractor handoff API
+│   │       ├── version_history.py # Version history API
+│   │       ├── climate.py       # Climate adjustment API
 │   │       └── scrap.py         # Scrap tracker endpoints
 │   ├── main.py                 # FastAPI application
 │   ├── requirements.txt         # Python dependencies
@@ -249,7 +285,15 @@ modology-cabinet-designer/
 │   │       ├── DesignExporter.tsx   # 3D model exports
 │   │       ├── TemplateGallery.tsx  # Project templates browser
 │   │       ├── ScrapTracker.tsx     # Leftover piece tracker
-│   │       └── Localization.tsx     # Local supplier finder by zip code
+│   │       ├── Localization.tsx     # Local supplier finder by zip code
+│   │       ├── DesignDoctor.tsx     # Design mistake checker
+│   │       ├── StylePresetsGallery.tsx # Style presets browser
+│   │       ├── CostOptimizer.tsx    # Cost optimization report
+│   │       ├── BoardYieldOptimizer.tsx # Board yield calculator
+│   │       ├── BragSheet.tsx        # Social media share generator
+│   │       ├── ContractorHandoff.tsx # Professional PDF generator
+│   │       ├── VersionHistory.tsx   # Design version history
+│   │       └── ClimateAdjustment.tsx # Climate-based recommendations
 │   ├── package.json             # NPM dependencies
 │   ├── tsconfig.json           # TypeScript config
 │   ├── tailwind.config.ts       # Tailwind CSS config
@@ -587,6 +631,48 @@ npm test
 - `GET /api/localization/categories` - List all supplier categories
 - `GET /api/localization/store-types` - List all store types
 
+### Design Doctor
+- `POST /api/design-doctor/check` - Check design for common mistakes
+- `GET /api/design-doctor/rules` - List all design rules
+- `GET /api/design-doctor/categories` - List mistake categories
+
+### Style Presets
+- `GET /api/style-presets/` - List all style presets
+- `GET /api/style-presets/{id}` - Get preset details
+- `POST /api/style-presets/apply/{cabinet_id}` - Apply style to cabinet
+- `GET /api/style-presets/categories` - List style categories
+
+### Cost Optimizer
+- `POST /api/cost-optimizer/analyze` - Analyze design for cost savings
+- `GET /api/cost-optimizer/alternatives/{material_id}` - Get material alternatives
+- `GET /api/cost-optimizer/bulk-suggestions` - Get bulk purchasing suggestions
+
+### Board Yield
+- `POST /api/board-yield/calculate` - Calculate board yield optimization
+- `GET /api/board-yield/layouts/{optimization_id}` - Get cut layouts
+- `GET /api/board-yield/suggestions` - Get yield improvement suggestions
+
+### Brag Sheet
+- `POST /api/brag-sheet/generate` - Generate social media share content
+- `GET /api/brag-sheet/templates` - List share templates
+- `GET /api/brag-sheet/platforms` - List supported platforms
+
+### Contractor Handoff
+- `POST /api/contractor-handoff/generate` - Generate professional PDF
+- `GET /api/contractor-handoff/templates` - List handoff templates
+- `GET /api/contractor-handoff/include-options` - List PDF include options
+
+### Version History
+- `GET /api/version-history/{project_id}` - Get project version history
+- `POST /api/version-history/{project_id}` - Save new version
+- `POST /api/version-history/{project_id}/restore/{version}` - Restore to version
+- `GET /api/version-history/{project_id}/compare/{v1}/{v2}` - Compare versions
+
+### Climate Adjustment
+- `GET /api/climate/zones` - List climate zones
+- `POST /api/climate/recommendations` - Get climate-based recommendations
+- `GET /api/climate/humidity-zones` - List humidity zones
+
 ### Payments (Stripe)
 - `GET /api/stripe/plans` - Get all subscription plans
 - `POST /api/stripe/create-checkout-session` - Create checkout session
@@ -642,6 +728,14 @@ npm test
 │   - Template Gallery                  │
 │   - Scrap Tracker                     │
 │   - Localization Finder               │
+│   - Design Doctor                     │
+│   - Style Presets Gallery             │
+│   - Cost Optimizer                    │
+│   - Board Yield Optimizer             │
+│   - Brag Sheet Generator              │
+│   - Contractor Handoff                │
+│   - Version History                   │
+│   - Climate Adjustment                │
 └──────────────┬──────────────────────┘
                │
                │ API calls (same domain)
@@ -658,6 +752,14 @@ npm test
 │   - Price Feeds API                 │
 │   - Scrap Tracker API               │
 │   - Localization API                │
+│   - Design Doctor API               │
+│   - Style Presets API               │
+│   - Cost Optimizer API              │
+│   - Board Yield API                 │
+│   - Brag Sheet API                  │
+│   - Contractor Handoff API          │
+│   - Version History API             │
+│   - Climate Adjustment API          │
 └──────────────┬──────────────────────┘
                │
                │ DATABASE_URL (same VPC)
@@ -703,7 +805,7 @@ npm test
 - [x] User accounts and authentication (JWT)
 - [x] Project collaboration and sharing
 - [x] Permission levels (view, edit, admin)
-- [x] Hardware supplier integration (6 suppliers)
+- [x] Hardware supplier integration (24 suppliers)
 - [x] Price comparison across suppliers
 - [x] Hardware recommendations
 
@@ -801,7 +903,7 @@ npm test
 
 - [x] **Scrap Tracker**
   - Automatically tracks usable offcuts after cuts
-  - Shows what's left: "You have a 12×24\" piece — perfect for drawer bottoms"
+  - Shows what's left: "You have a 12×24" piece — perfect for drawer bottoms"
   - Suggests future projects that can use existing scraps
   - Groups scraps by material type
   - Find matching scrap for needed dimensions
@@ -812,7 +914,7 @@ npm test
 - [x] **Unit Toggle (Metric/Imperial)**
   - Instant toggle between inches and millimeters
   - Persistent preferences saved to localStorage
-  - Fraction display support for imperial (1/16\", 1/8\", etc.)
+  - Fraction display support for imperial (1/16", 1/8", etc.)
   - Unit input components with automatic conversion
   - Format display for both systems
   - Seamless switching without re-entering values
@@ -830,6 +932,79 @@ npm test
   - Personalized recommendations based on location
   - Quick links to popular suppliers
 
+- [x] **Design Doctor (Mistake Checker)**
+  - AI checks your design for common mistakes
+  - Unsupported spans detection
+  - Drawer clearance issues
+  - Hardware conflicts
+  - Moisture trap warnings
+  - Suggested fixes with explanations
+  - Severity levels (warning, error, critical)
+  - Auto-fix suggestions where applicable
+
+- [x] **Style Presets Gallery**
+  - Shaker, flat-panel, raised-panel, inset doors, face-frame vs frameless
+  - One-click style swap to visualize options
+  - Mix and match styles
+  - Preview with different materials and colors
+  - Community-contributed styles
+  - Style categories (modern, traditional, rustic, contemporary)
+  - Apply to entire project or individual cabinets
+
+- [x] **"Best Bang for Your Buck" Report**
+  - Analyze design → suggest cheaper alternatives
+  - MDF vs plywood recommendations
+  - Alternative hardware options
+  - Cost/quality tradeoff analysis
+  - Bulk purchasing suggestions
+  - Potential savings breakdown
+  - Quality impact ratings
+
+- [x] **Board Yield Optimizer**
+  - Enter plywood prices from your supplier
+  - Get exact sheets needed
+  - Which cuts to make from which sheet
+  - Minimize waste per board
+  - Visual cut layouts
+  - Waste percentage per sheet
+  - Cost optimization across multiple sheet sizes
+
+- [x] **"Brag Sheet" Generator**
+  - Auto-create shareable before/after posts
+  - Cut list, cost, and time invested
+  - Perfect for social media
+  - Watermark-free images
+  - Multiple platform formats (Instagram, Facebook, Pinterest)
+  - Custom captions and hashtags
+  - Project statistics and achievements
+
+- [x] **Contractor Handoff Mode**
+  - Generate professional PDF
+  - Specs, materials, and hardware list
+  - Send to a cabinetmaker if DIY gets too complex
+  - Include CAD files for professional tools
+  - Contact information templates
+  - Project timeline estimates
+  - Professional formatting and branding
+
+- [x] **Version History for Builds**
+  - "I modified the pantry design 3 times"
+  - Keep all versions
+  - Notes on why you changed things
+  - Branch and compare versions
+  - Restore previous versions
+  - Version comparison (diff view)
+  - Automatic version naming
+
+- [x] **Climate Adjustment**
+  - Enter your humidity zone
+  - Suggests plywood/MDF considerations
+  - Joint tolerance adjustments
+  - Seasonal movement warnings
+  - Finish recommendations for your climate
+  - Wood acclimation guidelines
+  - Climate zone lookup by zip code
+
 #### 📋 Planned
 
 - [ ] **Sketch-to-Design Import**
@@ -846,28 +1021,6 @@ npm test
   - Multiple layout options
   - Save scanned spaces for future reference
 
-- [ ] **Style Presets Gallery**
-  - Shaker, flat-panel, raised-panel, inset doors, face-frame vs frameless
-  - One-click style swap to visualize options
-  - Mix and match styles
-  - Preview with different materials and colors
-  - Community-contributed styles
-
-- [ ] **"Design Doctor" (Mistake Checker)**
-  - AI checks your design for common mistakes
-  - Unsupported spans detection
-  - Drawer clearance issues
-  - Hardware conflicts
-  - Moisture trap warnings
-  - Suggested fixes with explanations
-
-- [ ] **"Best Bang for Your Buck" Report**
-  - Analyze design → suggest cheaper alternatives
-  - MDF vs plywood recommendations
-  - Alternative hardware options
-  - Cost/quality tradeoff analysis
-  - Bulk purchasing suggestions
-
 - [ ] **Scratch-Build Calculator**
   - Enter tools you own (table saw, router, etc.)
   - Get time estimates specific to your setup
@@ -880,87 +1033,12 @@ npm test
   - Price comparison between stores
   - Material pickup route optimization
 
-- [ ] **Board Yield Optimizer**
-  - Enter plywood prices from your supplier
-  - Get exact sheets needed
-  - Which cuts to make from which sheet
-  - Minimize waste per board
-
-- [ ] **Step-by-Step Assembly Guide**
-  - Auto-generated IKEA-style instructions
-  - Exploded views with numbered steps
-  - Hardware callouts per step
-  - Pro tips for each operation
-  - Estimated time per step
-
-- [ ] **Video Tutorial Generator**
-  - "Show me how to build the face frame"
-  - AI generates or links to relevant YouTube techniques
-  - Time-stamped technique references
-  - Skill-level appropriate suggestions
-
-- [ ] **"Do I Have the Tools?" Checklist**
-  - Scan your design → lists every tool needed
-  - Kreg jig, pocket screws, specific router bits
-  - Alternatives if you don't own a tool
-  - Tool borrowing/rental suggestions
-  - Estimated setup time
-
-- [ ] **Cut List by Tool**
-  - Organize cuts by which tool you'll use
-  - Table saw cuts together, router cuts together
-  - Saves setup time
-  - Tool-specific cutting order optimization
-
-- [ ] **Skill Assessment Mode**
-  - "I'm a beginner" → auto-simplify designs, add more structure
-  - Suggest easier joinery techniques
-  - "I'm advanced" → unlock complex options
-  - Progressive skill building recommendations
-
-- [ ] **Mistake Avoidance Tips**
-  - Contextual warnings during design
-  - "This dado is 1/4\" but your plywood is actually 23/32\" — adjust or you'll have loose joints"
-  - Material-specific considerations
-  - Common pitfall explanations
-
-- [ ] **"Why This Way?" Explanations**
-  - Hover over any design element
-  - Explains the reasoning
-  - "3/4\" plywood here prevents sag on 36\" span"
-  - Links to educational resources
-
 - [ ] **Community Build Gallery**
   - Browse designs others have actually built
   - Real photos of completed projects
   - Cost breakdowns
   - Lessons learned and tips
   - Rating and comments
-
-- [ ] **"Brag Sheet" Generator**
-  - Auto-create shareable before/after posts
-  - Cut list, cost, and time invested
-  - Perfect for social media
-  - Watermark-free images
-
-- [ ] **Contractor Handoff Mode**
-  - Generate professional PDF
-  - Specs, materials, and hardware list
-  - Send to a cabinetmaker if DIY gets too complex
-  - Include CAD files for professional tools
-
-- [ ] **Version History for Builds**
-  - "I modified the pantry design 3 times"
-  - Keep all versions
-  - Notes on why you changed things
-  - Branch and compare versions
-
-- [ ] **Climate Adjustment**
-  - Enter your humidity zone
-  - Suggests plywood/MDF considerations
-  - Joint tolerance adjustments
-  - Seasonal movement warnings
-  - Finish recommendations for your climate
 
 ## 🤝 Contributing
 
