@@ -663,6 +663,161 @@ npm test
   - Hardware placement guides and templates
   - Automatic hardware list generation for projects
 
+### Phase 5: User Experience & Woodworker-Focused Features
+
+#### ✅ Complete
+
+- [x] **Scrap Tracker**
+  - Automatically tracks usable offcuts after cuts
+  - Shows what's left: "You have a 12×24\" piece — perfect for drawer bottoms"
+  - Suggests future projects that can use existing scraps
+  - Groups scraps by material type
+  - Find matching scrap for needed dimensions
+  - Mark scraps as used or delete them
+  - Summary view with total pieces, square footage, and suggested uses
+  - Priority-ranked suggestions for scrap utilization
+
+- [x] **Unit Toggle (Metric/Imperial)**
+  - Instant toggle between inches and millimeters
+  - Persistent preferences saved to localStorage
+  - Fraction display support for imperial (1/16\", 1/8\", etc.)
+  - Unit input components with automatic conversion
+  - Format display for both systems
+  - Seamless switching without re-entering values
+  - Supports feet, inches, mm, cm, and meters
+
+#### 📋 Planned
+
+- [ ] **Sketch-to-Design Import**
+  - Upload a pencil sketch or photo → AI converts to 3D cabinet model
+  - Perfect for DIYers who think on paper first
+  - Automatic dimension detection
+  - Style recognition (shaker, flat-panel, etc.)
+  - Manual adjustment tools
+
+- [ ] **"What Would Fit?" AR Scanner**
+  - Point phone at a space (garage corner, closet nook)
+  - AR suggests cabinet configurations that maximize storage
+  - Real-time dimension capture
+  - Multiple layout options
+  - Save scanned spaces for future reference
+
+- [ ] **Style Presets Gallery**
+  - Shaker, flat-panel, raised-panel, inset doors, face-frame vs frameless
+  - One-click style swap to visualize options
+  - Mix and match styles
+  - Preview with different materials and colors
+  - Community-contributed styles
+
+- [ ] **"Design Doctor" (Mistake Checker)**
+  - AI checks your design for common mistakes
+  - Unsupported spans detection
+  - Drawer clearance issues
+  - Hardware conflicts
+  - Moisture trap warnings
+  - Suggested fixes with explanations
+
+- [ ] **"Best Bang for Your Buck" Report**
+  - Analyze design → suggest cheaper alternatives
+  - MDF vs plywood recommendations
+  - Alternative hardware options
+  - Cost/quality tradeoff analysis
+  - Bulk purchasing suggestions
+
+- [ ] **Scratch-Build Calculator**
+  - Enter tools you own (table saw, router, etc.)
+  - Get time estimates specific to your setup
+  - Tips and techniques for your tool combination
+  - Tool rental recommendations for specialized cuts
+
+- [ ] **Home Depot/Lowe's Integration**
+  - One-click "Add to Cart" with local store inventory check
+  - Real-time stock availability
+  - Price comparison between stores
+  - Material pickup route optimization
+
+- [ ] **Board Yield Optimizer**
+  - Enter plywood prices from your supplier
+  - Get exact sheets needed
+  - Which cuts to make from which sheet
+  - Minimize waste per board
+
+- [ ] **Step-by-Step Assembly Guide**
+  - Auto-generated IKEA-style instructions
+  - Exploded views with numbered steps
+  - Hardware callouts per step
+  - Pro tips for each operation
+  - Estimated time per step
+
+- [ ] **Video Tutorial Generator**
+  - "Show me how to build the face frame"
+  - AI generates or links to relevant YouTube techniques
+  - Time-stamped technique references
+  - Skill-level appropriate suggestions
+
+- [ ] **"Do I Have the Tools?" Checklist**
+  - Scan your design → lists every tool needed
+  - Kreg jig, pocket screws, specific router bits
+  - Alternatives if you don't own a tool
+  - Tool borrowing/rental suggestions
+  - Estimated setup time
+
+- [ ] **Cut List by Tool**
+  - Organize cuts by which tool you'll use
+  - Table saw cuts together, router cuts together
+  - Saves setup time
+  - Tool-specific cutting order optimization
+
+- [ ] **Skill Assessment Mode**
+  - "I'm a beginner" → auto-simplify designs, add more structure
+  - Suggest easier joinery techniques
+  - "I'm advanced" → unlock complex options
+  - Progressive skill building recommendations
+
+- [ ] **Mistake Avoidance Tips**
+  - Contextual warnings during design
+  - "This dado is 1/4\" but your plywood is actually 23/32\" — adjust or you'll have loose joints"
+  - Material-specific considerations
+  - Common pitfall explanations
+
+- [ ] **"Why This Way?" Explanations**
+  - Hover over any design element
+  - Explains the reasoning
+  - "3/4\" plywood here prevents sag on 36\" span"
+  - Links to educational resources
+
+- [ ] **Community Build Gallery**
+  - Browse designs others have actually built
+  - Real photos of completed projects
+  - Cost breakdowns
+  - Lessons learned and tips
+  - Rating and comments
+
+- [ ] **"Brag Sheet" Generator**
+  - Auto-create shareable before/after posts
+  - Cut list, cost, and time invested
+  - Perfect for social media
+  - Watermark-free images
+
+- [ ] **Contractor Handoff Mode**
+  - Generate professional PDF
+  - Specs, materials, and hardware list
+  - Send to a cabinetmaker if DIY gets too complex
+  - Include CAD files for professional tools
+
+- [ ] **Version History for Builds**
+  - "I modified the pantry design 3 times"
+  - Keep all versions
+  - Notes on why you changed things
+  - Branch and compare versions
+
+- [ ] **Climate Adjustment**
+  - Enter your humidity zone
+  - Suggests plywood/MDF considerations
+  - Joint tolerance adjustments
+  - Seasonal movement warnings
+  - Finish recommendations for your climate
+
 ## 🤝 Contributing
 
 This is currently a solo project, but contributions are welcome!
