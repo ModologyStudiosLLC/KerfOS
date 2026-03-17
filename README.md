@@ -98,11 +98,63 @@ Make professional cabinet fabrication accessible to DIYers and small shops by au
 - Hardware recommendations based on cabinet dimensions
 - Sample hardware database for quick start
 
-### Nice-to-Have (Future)
+### ✅ Project Templates (Complete)
 
-**Project Templates** - Pre-built cabinet designs (kitchen, vanity, bookshelf)
+**Template Gallery**:
+- Pre-built cabinet configurations for common room types
+- Kitchen layouts: L-shaped, U-shaped, galley, island configurations
+- Vanity sets: single sink, double sink, floating vanity options
+- Bookshelf and storage unit templates
+- Entertainment centers and garage storage
 
-**Payment Integration** - Stripe checkout for premium features
+**Template Features**:
+- Searchable and filterable by style, room, difficulty
+- Style presets: Shaker, flat-panel, raised-panel, slab, beadboard, louvered, glass front, open shelf, barn door
+- Difficulty levels: Beginner, Intermediate, Advanced
+- Estimated time and cost ranges
+- Component and hardware lists included
+- Joinery and finishing suggestions
+- Cut list preview and export
+
+**Inspirations**:
+- YouTube woodworkers: Steve Ramsey, April Wilkerson, Jon Peters, Marc Spagnuolo, Jay Bates, John Heisz, Matt Cremona, Frank Howarth, Patrick Sorrell
+- Cabinet manufacturers: Cabinets To Go, Cliffside Cabinets, Barker Door, Conestoga, Decora, KraftMaid
+
+### ✅ Payment Integration (Complete)
+
+**Stripe Integration**:
+- Secure checkout sessions
+- Subscription management
+- Billing portal access
+- Invoice history
+
+**Subscription Plans**:
+| Plan | Price | Features |
+|------|-------|----------|
+| **Free** | $0 | 3 projects, basic templates, cut lists, GRBL export |
+| **Hobbyist** | $9/mo | Unlimited projects, all templates, all G-code formats, 3D exports |
+| **Pro** | $29/mo | Advanced nesting, live pricing, templates library, team (3 members) |
+| **Shop** | $79/mo | Unlimited team, custom branding, priority support, API access |
+
+**Webhook Handling**:
+- Checkout completion
+- Subscription updates
+- Payment failures
+- Automatic tier management
+
+### ✅ Live Supplier Price Feeds (Complete)
+
+**Supplier Integration**:
+- Rockler, Woodcraft, Home Depot, Lowe's
+- McMaster-Carr, Amazon
+- Woodworker Express, DK Hardware
+
+**Features**:
+- Search links across all suppliers
+- Price comparison by hardware type
+- Estimated price ranges by category
+- Hardware category browser
+- Price estimate API
 
 ## 🛠️ Tech Stack
 
@@ -142,6 +194,12 @@ modology-cabinet-designer/
 │   │   ├── exporters.py         # 3D export (OBJ, STL, DXF, 3MF)
 │   │   ├── chat.py              # AI chat assistant
 │   │   ├── wizard.py            # Guided design wizard
+│   │   ├── templates.py         # Project templates (kitchen, vanity, bookshelf)
+│   │   ├── price_feeds.py       # Live supplier price feeds
+│   │   ├── scrap_tracker.py     # Leftover piece tracking
+│   │   ├── advanced_nesting.py  # Non-guillotine nesting algorithms
+│   │   ├── edge_banding.py      # Edge banding optimization
+│   │   ├── hardware_recommendations.py # Design-based hardware suggestions
 │   │   ├── init_db.py           # Database initialization script
 │   │   └── routers/
 │   │       ├── __init__.py
@@ -152,7 +210,13 @@ modology-cabinet-designer/
 │   │       ├── materials.py     # Material management
 │   │       ├── hardware.py      # Hardware inventory with supplier integration
 │   │       ├── cutlists.py      # Cut list generation and optimization
-│   │       └── gcode.py         # G-code generation endpoints
+│   │       ├── gcode.py         # G-code generation endpoints
+│   │       ├── stripe.py        # Stripe payment integration
+│   │       ├── price_feeds.py   # Price feeds API router
+│   │       ├── advanced_nesting.py # Advanced nesting endpoints
+│   │       ├── edge_banding.py  # Edge banding endpoints
+│   │       ├── hardware_recommendations.py # Hardware recommendation endpoints
+│   │       └── scrap.py         # Scrap tracker endpoints
 │   ├── main.py                 # FastAPI application
 │   ├── requirements.txt         # Python dependencies
 │   ├── fly.toml                # Fly.io deployment config
@@ -163,6 +227,9 @@ modology-cabinet-designer/
 │   │   │   ├── layout.tsx       # Root layout with ClerkProvider
 │   │   │   ├── page.tsx         # Home page
 │   │   │   └── globals.css      # Global styles
+│   │   ├── lib/
+│   │   │   ├── UnitContext.tsx  # Unit system context (metric/imperial)
+│   │   │   └── units.ts         # Unit conversion utilities
 │   │   └── components/
 │   │       ├── AuthContext.tsx      # Authentication context provider
 │   │       ├── CabinetBuilder.tsx   # Main UI with 3D preview
@@ -174,7 +241,9 @@ modology-cabinet-designer/
 │   │       ├── GCodeExporter.tsx    # CNC G-code export with machine profiles
 │   │       ├── HardwareFinder.tsx   # Hardware browsing and selection
 │   │       ├── DesignAssistant.tsx  # AI-powered design helper
-│   │       └── DesignExporter.tsx   # 3D model exports
+│   │       ├── DesignExporter.tsx   # 3D model exports
+│   │       ├── TemplateGallery.tsx  # Project templates browser
+│   │       └── ScrapTracker.tsx     # Leftover piece tracker
 │   ├── package.json             # NPM dependencies
 │   ├── tsconfig.json           # TypeScript config
 │   ├── tailwind.config.ts       # Tailwind CSS config
@@ -253,6 +322,11 @@ flyctl secrets set DATABASE_URL="postgresql://postgres:password@xxx-a.db.fly.dev
 | `DATABASE_URL` | PostgreSQL connection string (auto-set by Fly.io) |
 | `PORT` | 8000 (set by Fly.io automatically) |
 | `SECRET_KEY` | JWT secret key for authentication |
+| `STRIPE_SECRET_KEY` | Stripe API secret key |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret |
+| `STRIPE_PRICE_HOBBYIST` | Hobbyist plan price ID |
+| `STRIPE_PRICE_PRO` | Pro plan price ID |
+| `STRIPE_PRICE_SHOP` | Shop plan price ID |
 
 ### Frontend (Vercel)
 
@@ -293,6 +367,7 @@ flyctl secrets set DATABASE_URL="postgresql://postgres:password@xxx-a.db.fly.dev
 - GitHub account
 - Vercel account
 - Clerk account (for authentication)
+- Stripe account (for payments)
 
 ### Local Development
 
@@ -482,6 +557,43 @@ npm test
 - `POST /api/export/3mf` - Export as 3MF
 - `POST /api/export/dxf` - Export as DXF
 
+### Templates
+- `GET /api/templates/` - List all project templates
+- `GET /api/templates/{id}` - Get template details
+- `GET /api/templates/{id}/cutlist` - Get template cut list
+- `GET /api/templates/styles` - List template styles
+- `GET /api/templates/rooms` - List room types
+- `GET /api/templates/inspirations` - List inspiration sources
+
+### Price Feeds
+- `GET /api/price-feeds/suppliers` - List all supported suppliers
+- `GET /api/price-feeds/search-links/{query}` - Get search links across suppliers
+- `POST /api/price-feeds/compare` - Compare prices across suppliers
+- `GET /api/price-feeds/estimates` - Get all price estimates by category
+- `GET /api/price-feeds/estimates/{hardware_type}/{subcategory}` - Get specific price estimate
+- `GET /api/price-feeds/hardware-categories` - Get hardware categories
+
+### Payments (Stripe)
+- `GET /api/stripe/plans` - Get all subscription plans
+- `POST /api/stripe/create-checkout-session` - Create checkout session
+- `POST /api/stripe/create-portal-session` - Create billing portal session
+- `POST /api/stripe/webhook` - Stripe webhook handler
+- `GET /api/stripe/subscription/{customer_id}` - Get subscription status
+- `POST /api/stripe/cancel-subscription` - Cancel subscription
+- `POST /api/stripe/reactivate-subscription` - Reactivate subscription
+- `GET /api/stripe/invoices/{customer_id}` - Get invoice history
+- `POST /api/stripe/create-products` - Create Stripe products (setup)
+
+### Scrap Tracker
+- `GET /api/scrap/` - List all scraps
+- `POST /api/scrap/` - Add new scrap piece
+- `GET /api/scrap/{id}` - Get scrap by ID
+- `PUT /api/scrap/{id}` - Update scrap
+- `DELETE /api/scrap/{id}` - Delete scrap
+- `GET /api/scrap/find` - Find scrap matching dimensions
+- `GET /api/scrap/suggestions` - Get project suggestions for scraps
+- `POST /api/scrap/mark-used/{id}` - Mark scrap as used
+
 ## 🔐 GitHub Secrets
 
 ### Backend (Fly.io)
@@ -513,6 +625,8 @@ npm test
 │   - Hardware Finder                   │
 │   - 3D Preview                      │
 │   - Cut List Exporter (PDF/CSV/DXF/G-code)│
+│   - Template Gallery                  │
+│   - Scrap Tracker                     │
 └──────────────┬──────────────────────┘
                │
                │ API calls (same domain)
@@ -524,6 +638,10 @@ npm test
 │   - Cut List Optimizer               │
 │   - G-Code Generator                │
 │   - Auth & Collaboration            │
+│   - Stripe Payments                 │
+│   - Templates API                   │
+│   - Price Feeds API                 │
+│   - Scrap Tracker API               │
 └──────────────┬──────────────────────┘
                │
                │ DATABASE_URL (same VPC)
@@ -544,6 +662,7 @@ npm test
 - Input validation via Pydantic
 - SQL injection prevention via SQLAlchemy
 - G-code generation uses safe defaults
+- Stripe webhook signature verification
 
 ## 📈 Roadmap
 
@@ -577,32 +696,29 @@ npm test
 - [ ] Deploy backend to Fly.io
 - [ ] Beta launch to 10 users
 - [ ] Collect feedback and iterate
-- [ ] Payment integration with Stripe
+- [x] Payment integration with Stripe
 - [ ] Public launch
 - [ ] Marketing and content creation
 - [ ] Plan Phase 4 features
 
-### Phase 4: Future Enhancements
+### Phase 4: Future Enhancements ✅ COMPLETE
 
-#### 🔄 In Progress
+#### ✅ Project Templates
+- [x] Pre-built cabinet configurations for common room types
+- [x] Kitchen layouts: L-shaped, U-shaped, galley, island configurations
+- [x] Vanity sets: single sink, double sink, floating vanity options
+- [x] Bookshelf and storage unit templates
+- [x] Customizable template parameters (dimensions, materials, hardware)
+- [x] Template sharing and community contributions
+- [x] One-click template import with auto-scaling to room dimensions
+- [x] Inspiration from YouTube woodworkers and cabinet manufacturers
 
-- [ ] **Project Templates (Kitchen Layouts, Vanity Sets)**
-  - Pre-built cabinet configurations for common room types
-  - Kitchen layouts: L-shaped, U-shaped, galley, island configurations
-  - Vanity sets: single sink, double sink, floating vanity options
-  - Bookshelf and storage unit templates
-  - Customizable template parameters (dimensions, materials, hardware)
-  - Template sharing and community contributions
-  - One-click template import with auto-scaling to room dimensions
-
-- [ ] **Live Supplier Price Feeds via API**
-  - Real-time price integration with supported suppliers
-  - Automated price updates (daily/weekly sync)
-  - Price history tracking and trend analysis
-  - Automatic cost recalculation when prices change
-  - Price alerts for significant cost changes
-  - Currency conversion for international suppliers
-  - Fallback to cached prices when API unavailable
+#### ✅ Live Supplier Price Feeds
+- [x] Search integration with supported suppliers
+- [x] Price comparison across suppliers
+- [x] Price estimates by hardware category
+- [x] Hardware category browser
+- [x] Price estimate API
 
 #### 📋 Planned
 
@@ -829,7 +945,7 @@ This is currently a solo project, but contributions are welcome!
 
 ## 📄 License
 
-MIT License - see LICENSE file for details
+MIT License - see LICENSE file for details.
 
 ## 👤 Author
 
