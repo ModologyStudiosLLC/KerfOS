@@ -10,6 +10,11 @@ Includes routers for:
 - Chat (AI assistant)
 - Wizard (guided design)
 - Stripe (payments)
+- Templates (Phase 4 - project templates)
+- Price Feeds (Phase 4 - live supplier pricing)
+- Advanced Nesting (Phase 4 - non-guillotine algorithms)
+- Edge Banding (Phase 4 - edge banding optimization)
+- Hardware Recommendations (Phase 4 - design-based suggestions)
 """
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,7 +22,12 @@ from contextlib import asynccontextmanager
 from pydantic import BaseModel
 from typing import Dict, Any, Optional, List
 
-from app.routers import cabinets, materials, hardware, cutlists, auth, collaboration, projects, gcode, stripe
+from app.routers import (
+    cabinets, materials, hardware, cutlists, auth, collaboration,
+    projects, gcode, stripe, price_feeds, advanced_nesting,
+    edge_banding, hardware_recommendations
+)
+from app.templates import router as templates_router
 from app.database import engine, get_db
 from app.models import Base
 from app.gcode_generator import generate_gcode, GCodeConfig
@@ -48,8 +58,13 @@ API for AI-powered cabinet design tool with:
 - AI chat assistant
 - Guided wizard mode
 - Stripe subscription payments
+- Project templates (kitchen, vanity, bookshelf)
+- Live supplier price feeds
+- Advanced nesting algorithms
+- Edge banding optimization
+- Hardware recommendations
     """,
-    version="1.0.0",
+    version="2.0.0",
     lifespan=lifespan
 )
 
@@ -74,7 +89,7 @@ app.add_middleware(
 async def root():
     return {
         "message": "Modology Cabinet Designer API",
-        "version": "1.0.0",
+        "version": "2.0.0",
         "status": "running",
         "features": [
             "Cabinet design and management",
@@ -87,7 +102,12 @@ async def root():
             "Project collaboration and sharing",
             "AI chat assistant",
             "Guided wizard mode",
-            "Stripe subscription payments"
+            "Stripe subscription payments",
+            "Project templates (kitchen, vanity, bookshelf)",
+            "Live supplier price feeds",
+            "Advanced nesting algorithms",
+            "Edge banding optimization",
+            "Hardware recommendations"
         ],
         "endpoints": {
             "cabinets": "/api/cabinets",
@@ -100,13 +120,18 @@ async def root():
             "gcode": "/api/gcode",
             "chat": "/api/chat",
             "wizard": "/api/wizard",
-            "stripe": "/api/stripe"
+            "stripe": "/api/stripe",
+            "templates": "/api/templates",
+            "price_feeds": "/api/price-feeds",
+            "advanced_nesting": "/api/advanced-nesting",
+            "edge_banding": "/api/edge-banding",
+            "hardware_recommendations": "/api/hardware-recommendations"
         }
     }
 
 @app.get("/health")
 async def health():
-    return {"status": "healthy", "version": "1.0.0"}
+    return {"status": "healthy", "version": "2.0.0"}
 
 @app.get("/init-db")
 async def init_database():
@@ -315,3 +340,10 @@ app.include_router(collaboration.router)
 app.include_router(projects.router)
 app.include_router(gcode.router)
 app.include_router(stripe.router)
+
+# Phase 4 routers
+app.include_router(templates_router)
+app.include_router(price_feeds.router)
+app.include_router(advanced_nesting.router)
+app.include_router(edge_banding.router)
+app.include_router(hardware_recommendations.router)
