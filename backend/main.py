@@ -10,13 +10,19 @@ Includes routers for:
 - Chat (AI assistant)
 - Wizard (guided design)
 - Stripe (payments)
-- Templates (Phase 4 - project templates)
-- Price Feeds (Phase 4 - live supplier pricing)
-- Advanced Nesting (Phase 4 - non-guillotine algorithms)
-- Edge Banding (Phase 4 - edge banding optimization)
-- Hardware Recommendations (Phase 4 - design-based suggestions)
-- Scrap Tracker (Phase 5 - leftover piece tracking)
-- GDPR (Phase 6 - GDPR compliance)
+- Templates (project templates)
+- Price Feeds (live supplier pricing)
+- Advanced Nesting (non-guillotine algorithms)
+- Edge Banding (edge banding optimization)
+- Hardware Recommendations (design-based suggestions)
+- Scrap Tracker (leftover piece tracking)
+- AR Scanner (room measurement)
+- Sketch to Design (image import)
+- Scratch Build Calculator (time estimates)
+- Localization (local supplier finder)
+- Community Gallery (shared projects)
+- Store Integration (Home Depot/Lowe's)
+- GDPR (compliance)
 """
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -27,7 +33,9 @@ from typing import Dict, Any, Optional, List
 from app.routers import (
     cabinets, materials, hardware, cutlists, auth, collaboration,
     projects, gcode, stripe, price_feeds, advanced_nesting,
-    edge_banding, hardware_recommendations, scrap, gdpr
+    edge_banding, hardware_recommendations, scrap, gdpr,
+    ar_scanner, community_gallery, localization, scratch_build,
+    sketch_to_design, store_integration
 )
 from app.templates import router as templates_router
 from app.database import engine, get_db
@@ -69,10 +77,16 @@ API for AI-powered cabinet design tool with:
 - Edge banding optimization
 - Hardware recommendations
 - Scrap tracking and suggestions
+- AR room scanner
+- Sketch-to-design import
+- Scratch build calculator
+- Localization (local supplier finder)
+- Community gallery
+- Store integration (Home Depot/Lowe's)
 - GDPR compliance (data export, deletion, consent management)
 - Security (rate limiting, CSRF, input validation)
     """,
-    version="2.2.0",
+    version="3.0.0",
     lifespan=lifespan
 )
 
@@ -103,7 +117,7 @@ app.add_middleware(
 async def root():
     return {
         "message": "KerfOS API",
-        "version": "2.2.0",
+        "version": "3.0.0",
         "status": "running",
         "features": [
             "Cabinet design and management",
@@ -123,6 +137,12 @@ async def root():
             "Edge banding optimization",
             "Hardware recommendations",
             "Scrap tracking and suggestions",
+            "AR room scanner",
+            "Sketch-to-design import",
+            "Scratch build calculator",
+            "Localization (local supplier finder)",
+            "Community gallery",
+            "Store integration (Home Depot/Lowe's)",
             "GDPR compliance (data export, deletion, consent)",
             "Security (rate limiting, CSRF, input validation)"
         ],
@@ -144,13 +164,19 @@ async def root():
             "edge_banding": "/api/edge-banding",
             "hardware_recommendations": "/api/hardware-recommendations",
             "scrap": "/api/scrap",
+            "ar_scanner": "/api/ar-scanner",
+            "sketch_to_design": "/api/sketch-to-design",
+            "scratch_build": "/api/scratch-build",
+            "localization": "/api/localization",
+            "community_gallery": "/api/community-gallery",
+            "store_integration": "/api/store-integration",
             "gdpr": "/api/gdpr"
         }
     }
 
 @app.get("/health")
 async def health():
-    return {"status": "healthy", "version": "2.2.0"}
+    return {"status": "healthy", "version": "3.0.0"}
 
 @app.get("/init-db")
 async def init_database():
@@ -349,7 +375,11 @@ async def export_endpoint(format: str, cabinet_data: Dict[str, Any]):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
 
+# ==========================================
 # Include all routers
+# ==========================================
+
+# Core routers
 app.include_router(cabinets.router)
 app.include_router(materials.router)
 app.include_router(hardware.router)
@@ -360,15 +390,27 @@ app.include_router(projects.router)
 app.include_router(gcode.router)
 app.include_router(stripe.router)
 
-# Phase 4 routers
+# Templates router (from app.templates)
 app.include_router(templates_router)
+
+# Payment & Pricing
 app.include_router(price_feeds.router)
+
+# Phase 4 - Advanced Features
 app.include_router(advanced_nesting.router)
 app.include_router(edge_banding.router)
 app.include_router(hardware_recommendations.router)
 
-# Phase 5 routers
+# Phase 5 - Quality of Life
 app.include_router(scrap.router)
+app.include_router(ar_scanner.router)
+app.include_router(sketch_to_design.router)
+app.include_router(scratch_build.router)
 
-# Phase 6 routers (GDPR & Security)
+# Phase 5 - Localization & Community
+app.include_router(localization.router)
+app.include_router(community_gallery.router)
+app.include_router(store_integration.router)
+
+# Phase 6 - Compliance
 app.include_router(gdpr.router)
