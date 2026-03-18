@@ -1,4 +1,4 @@
-"""Main FastAPI application for Modology Cabinet Designer
+"""Main FastAPI application for KerfOS
 
 Includes routers for:
 - Cabinets, Materials, Hardware (core cabinet design)
@@ -16,6 +16,7 @@ Includes routers for:
 - Edge Banding (Phase 4 - edge banding optimization)
 - Hardware Recommendations (Phase 4 - design-based suggestions)
 - Scrap Tracker (Phase 5 - leftover piece tracking)
+- GDPR (Phase 6 - GDPR compliance)
 """
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,7 +27,7 @@ from typing import Dict, Any, Optional, List
 from app.routers import (
     cabinets, materials, hardware, cutlists, auth, collaboration,
     projects, gcode, stripe, price_feeds, advanced_nesting,
-    edge_banding, hardware_recommendations, scrap
+    edge_banding, hardware_recommendations, scrap, gdpr
 )
 from app.templates import router as templates_router
 from app.database import engine, get_db
@@ -35,6 +36,9 @@ from app.gcode_generator import generate_gcode, GCodeConfig
 from app.exporters import export_cabinet, MaterialInfo
 from app.chat import ChatRequest, ChatResponse, call_llm, generate_conversation_id
 from app.wizard import WizardRequest, WizardResponse, start_wizard, update_wizard_state, generate_cabinet_summary
+from app.security import (
+    SecurityMiddleware, InputValidationMiddleware, RequestLoggingMiddleware
+)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -45,7 +49,7 @@ async def lifespan(app: FastAPI):
     pass
 
 app = FastAPI(
-    title="Modology Cabinet Designer API",
+    title="KerfOS API",
     description="""
 API for AI-powered cabinet design tool with:
 - Cabinet design and management
@@ -65,10 +69,17 @@ API for AI-powered cabinet design tool with:
 - Edge banding optimization
 - Hardware recommendations
 - Scrap tracking and suggestions
+- GDPR compliance (data export, deletion, consent management)
+- Security (rate limiting, CSRF, input validation)
     """,
-    version="2.1.0",
+    version="2.2.0",
     lifespan=lifespan
 )
+
+# Add Security Middlewares (order matters - last added is first executed)
+app.add_middleware(RequestLoggingMiddleware)
+app.add_middleware(InputValidationMiddleware)
+app.add_middleware(SecurityMiddleware)
 
 # CORS - Allow Vercel, Fly.io, and local development
 app.add_middleware(
@@ -76,7 +87,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://localhost:4173",
-        "https://modologystudios.com",
+        "https://kerfos.com",
+        "https://www.kerfos.com",
         "*.vercel.app",  # Vercel frontend
         "*.fly.dev",   # Fly.io backend
         "*.onrender.com",  # Render backend (if used)
@@ -90,8 +102,8 @@ app.add_middleware(
 @app.get("/")
 async def root():
     return {
-        "message": "Modology Cabinet Designer API",
-        "version": "2.1.0",
+        "message": "KerfOS API",
+        "version": "2.2.0",
         "status": "running",
         "features": [
             "Cabinet design and management",
@@ -110,7 +122,9 @@ async def root():
             "Advanced nesting algorithms",
             "Edge banding optimization",
             "Hardware recommendations",
-            "Scrap tracking and suggestions"
+            "Scrap tracking and suggestions",
+            "GDPR compliance (data export, deletion, consent)",
+            "Security (rate limiting, CSRF, input validation)"
         ],
         "endpoints": {
             "cabinets": "/api/cabinets",
@@ -129,13 +143,14 @@ async def root():
             "advanced_nesting": "/api/advanced-nesting",
             "edge_banding": "/api/edge-banding",
             "hardware_recommendations": "/api/hardware-recommendations",
-            "scrap": "/api/scrap"
+            "scrap": "/api/scrap",
+            "gdpr": "/api/gdpr"
         }
     }
 
 @app.get("/health")
 async def health():
-    return {"status": "healthy", "version": "2.1.0"}
+    return {"status": "healthy", "version": "2.2.0"}
 
 @app.get("/init-db")
 async def init_database():
@@ -354,3 +369,6 @@ app.include_router(hardware_recommendations.router)
 
 # Phase 5 routers
 app.include_router(scrap.router)
+
+# Phase 6 routers (GDPR & Security)
+app.include_router(gdpr.router)
