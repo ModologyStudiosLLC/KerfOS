@@ -1,242 +1,218 @@
-"use client";
+'use client'
 
-import React, { useState } from "react";
-import CabinetPreview from "./CabinetPreview";
-import MaterialSelector from "./MaterialSelector";
-import DimensionEditor from "./DimensionEditor";
-import CutListExporter from "./CutListExporter";
-import CabinetForm from "./CabinetForm";
-import DesignExporter from "./DesignExporter";
-import DesignAssistant from "./DesignAssistant";
+import { useState } from 'react'
+import { Ruler, Box, Scissors, DollarSign } from 'lucide-react'
 
-export interface Cabinet {
-  id: string;
-  name: string;
-  width: number;
-  height: number;
-  depth: number;
-  materialId: string;
-  components: CabinetComponent[];
+interface Cabinet {
+  id: number
+  name: string
+  width: number
+  height: number
+  depth: number
+  material: string
 }
 
-export interface CabinetComponent {
-  id: string;
-  name: string;
-  width: number;
-  height: number;
-  quantity: number;
-  materialId: string;
-}
+export function CabinetBuilder() {
+  const [cabinet, setCabinet] = useState<Cabinet>({
+    id: 1,
+    name: 'Base Cabinet',
+    width: 36,
+    height: 34.5,
+    depth: 24,
+    material: 'Birch Plywood'
+  })
 
-export interface Material {
-  id: string;
-  name: string;
-  type: "plywood" | "mdf" | "hardwood";
-  thickness: number;
-  pricePerSqFt: number;
-  supplier: string;
-}
+  const [materials] = useState([
+    { id: 1, name: 'Birch Plywood', price: 65.99 },
+    { id: 2, name: 'MDF', price: 42.50 },
+    { id: 3, name: 'Oak Hardwood', price: 89.99 }
+  ])
 
-export default function CabinetBuilder() {
-  const [cabinets, setCabinets] = useState<Cabinet[]>([]);
-  const [selectedCabinet, setSelectedCabinet] = useState<Cabinet | null>(null);
-  const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
-  const [showAssistant, setShowAssistant] = useState(false);
+  const [cutList, setCutList] = useState<any[]>([])
+  const [price, setPrice] = useState<number>(0)
 
-  const handleAddCabinet = (cabinet: Cabinet) => {
-    setCabinets([...cabinets, cabinet]);
-    setSelectedCabinet(cabinet);
-    setShowAssistant(false); // Close assistant when cabinet is added
-  };
+  const calculateCutList = () => {
+    // Simple cut list calculation
+    const cuts = [
+      { part: 'Bottom/Top', quantity: 2, width: cabinet.width, height: cabinet.depth },
+      { part: 'Sides', quantity: 2, width: cabinet.height, height: cabinet.depth },
+      { part: 'Back', quantity: 1, width: cabinet.width, height: cabinet.height },
+      { part: 'Shelves', quantity: 2, width: cabinet.width - 1.5, height: cabinet.depth - 1.5 }
+    ]
+    setCutList(cuts)
+  }
 
-  const handleUpdateCabinet = (id: string, updatedCabinet: Partial<Cabinet>) => {
-    setCabinets(cabinets.map(c => 
-      c.id === id ? { ...c, ...updatedCabinet } : c
-    ));
-    if (selectedCabinet?.id === id) {
-      setSelectedCabinet({ ...selectedCabinet, ...updatedCabinet });
-    }
-  };
+  const calculatePrice = () => {
+    const selectedMaterial = materials.find(m => m.name === cabinet.material)
+    if (!selectedMaterial) return
 
-  const handleDeleteCabinet = (id: string) => {
-    setCabinets(cabinets.filter(c => c.id !== id));
-    if (selectedCabinet?.id === id) {
-      setSelectedCabinet(null);
-    }
-  };
+    // Simple price calculation
+    const cabinetVolume = cabinet.width * cabinet.height * cabinet.depth
+    const sheetArea = 48 * 96 // Standard sheet size in square inches
+    const estimatedSheets = cabinetVolume / (sheetArea * 0.75)
+    const materialCost = estimatedSheets * selectedMaterial.price
+    const hardwareCost = 25.00
+    const totalCost = materialCost + hardwareCost
 
-  const totalMaterials = calculateTotalMaterials(cabinets);
+    setPrice(totalCost)
+  }
+
+  const handleDimensionChange = (dimension: 'width' | 'height' | 'depth', value: number) => {
+    setCabinet(prev => ({
+      ...prev,
+      [dimension]: value
+    }))
+  }
+
+  const handleMaterialChange = (materialName: string) => {
+    setCabinet(prev => ({
+      ...prev,
+      material: materialName
+    }))
+  }
+
+  const handleCalculate = () => {
+    calculateCutList()
+    calculatePrice()
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">
-            Cabinet Designer
-          </h1>
-          <p className="text-slate-300">
-            Design cabinets, generate cut lists, and prepare for CNC fabrication
-          </p>
+    <div className="space-y-6">
+      {/* Dimensions */}
+      <div className="space-y-4">
+        <div className="flex items-center space-x-2">
+          <Ruler className="w-5 h-5 text-gray-500" />
+          <h3 className="text-lg font-medium">Dimensions (inches)</h3>
         </div>
+        
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Width</label>
+            <input
+              type="number"
+              value={cabinet.width}
+              onChange={(e) => handleDimensionChange('width', parseFloat(e.target.value))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Height</label>
+            <input
+              type="number"
+              value={cabinet.height}
+              onChange={(e) => handleDimensionChange('height', parseFloat(e.target.value))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Depth</label>
+            <input
+              type="number"
+              value={cabinet.depth}
+              onChange={(e) => handleDimensionChange('depth', parseFloat(e.target.value))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        </div>
+      </div>
 
-        {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column: Builder Controls */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Design Assistant Toggle */}
-            <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-              <h2 className="text-xl font-semibold text-white mb-4">
-                Design Assistant
-              </h2>
-              <button
-                type="button"
-                onClick={() => setShowAssistant(!showAssistant)}
-                className={`w-full py-3 rounded-lg font-medium transition-all ${
-                  showAssistant
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
-                }`}
-              >
-                {showAssistant ? '🤖 Hide Assistant' : '🤖 Show Assistant'}
-              </button>
+      {/* Material Selection */}
+      <div className="space-y-4">
+        <div className="flex items-center space-x-2">
+          <Box className="w-5 h-5 text-gray-500" />
+          <h3 className="text-lg font-medium">Material</h3>
+        </div>
+        
+        <div className="grid grid-cols-3 gap-4">
+          {materials.map((material) => (
+            <button
+              key={material.id}
+              onClick={() => handleMaterialChange(material.name)}
+              className={`p-4 border rounded-lg text-center transition-colors ${
+                cabinet.material === material.name
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              <div className="font-medium">{material.name}</div>
+              <div className="text-sm text-gray-600">${material.price}/sheet</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Calculate Button */}
+      <button
+        onClick={handleCalculate}
+        className="w-full py-3 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+      >
+        Calculate Cut List & Price
+      </button>
+
+      {/* Results */}
+      {cutList.length > 0 && (
+        <div className="space-y-6">
+          {/* Cut List */}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Scissors className="w-5 h-5 text-gray-500" />
+              <h3 className="text-lg font-medium">Cut List</h3>
             </div>
-
-            {/* Design Assistant Panel */}
-            {showAssistant && (
-              <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-                <DesignAssistant
-                  cabinets={cabinets}
-                  onAddCabinet={handleAddCabinet}
-                  onUpdateCabinet={handleUpdateCabinet}
-                  onCabinetSelect={(id) => {
-                    const cabinet = cabinets.find(c => c.id === id);
-                    if (cabinet) setSelectedCabinet(cabinet);
-                  }}
-                />
-              </div>
-            )}
-
-            {/* Add New Cabinet */}
-            {!showAssistant && (
-              <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-                <h2 className="text-xl font-semibold text-white mb-4">
-                  Add Cabinet
-                </h2>
-                <CabinetForm onAdd={handleAddCabinet} />
-              </div>
-            )}
-
-            {/* Material Selection */}
-            <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-              <h2 className="text-xl font-semibold text-white mb-4">
-                Materials
-              </h2>
-              <MaterialSelector 
-                selected={selectedMaterial}
-                onSelect={setSelectedMaterial}
-              />
-            </div>
-
-            {/* Export Options */}
-            <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-              <h2 className="text-xl font-semibold text-white mb-4">
-                Export
-              </h2>
-              <CutListExporter 
-                cabinets={cabinets}
-                materials={totalMaterials}
-              />
-              {selectedCabinet && (
-                <div className="mt-4 pt-4 border-t border-slate-700">
-                  <DesignExporter cabinet={selectedCabinet} />
-                </div>
-              )}
+            
+            <div className="bg-gray-50 rounded-lg p-4">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-2">Part</th>
+                    <th className="text-left py-2">Qty</th>
+                    <th className="text-left py-2">Width</th>
+                    <th className="text-left py-2">Height</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cutList.map((cut, index) => (
+                    <tr key={index} className="border-b last:border-0">
+                      <td className="py-2">{cut.part}</td>
+                      <td className="py-2">{cut.quantity}</td>
+                      <td className="py-2">{cut.width.toFixed(1)}"</td>
+                      <td className="py-2">{cut.height.toFixed(1)}"</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
 
-          {/* Middle Column: 3D Preview */}
-          <div className="lg:col-span-2">
-            <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 sticky top-6">
-              <h2 className="text-xl font-semibold text-white mb-4">
-                3D Preview
-              </h2>
-              {selectedCabinet ? (
-                <CabinetPreview 
-                  cabinet={selectedCabinet}
-                  material={selectedMaterial}
-                />
-              ) : (
-                <div className="h-96 flex items-center justify-center text-slate-400">
-                  <p>Select a cabinet to see 3D preview</p>
-                </div>
-              )}
+          {/* Price */}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <DollarSign className="w-5 h-5 text-gray-500" />
+              <h3 className="text-lg font-medium">Estimated Cost</h3>
             </div>
-
-
-            {/* Cabinet List */}
-            <div className="mt-6 bg-slate-800 rounded-xl p-6 border border-slate-700">
-              <h2 className="text-xl font-semibold text-white mb-4">
-                Cabinets ({cabinets.length})
-              </h2>
-              <div className="space-y-3">
-                {cabinets.map(cabinet => (
-                  <div 
-                    key={cabinet.id}
-                    className={`p-4 rounded-lg border transition-all ${
-                      selectedCabinet?.id === cabinet.id
-                        ? 'bg-blue-600/20 border-blue-500'
-                        : 'bg-slate-700/50 border-slate-600 hover:border-slate-500'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-semibold text-white">
-                        {cabinet.name}
-                      </h3>
-                      <button
-                        onClick={() => handleDeleteCabinet(cabinet.id)}
-                        className="text-red-400 hover:text-red-300 text-sm"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                    <p className="text-slate-400 text-sm">
-                      {cabinet.width}"W × {cabinet.height}"H × {cabinet.depth}"D
-                    </p>
-                    <button
-                      onClick={() => setSelectedCabinet(cabinet)}
-                      className="mt-2 text-blue-400 hover:text-blue-300 text-sm"
-                    >
-                      {selectedCabinet?.id === cabinet.id ? "Selected" : "Select"}
-                    </button>
-                  </div>
-                ))}
-                {cabinets.length === 0 && (
-                  <p className="text-slate-400 text-center py-8">
-                    No cabinets yet. Add your first cabinet above!
-                  </p>
-                )}
+            
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div className="text-2xl font-bold text-green-700">
+                ${price.toFixed(2)}
+              </div>
+              <div className="text-sm text-green-600 mt-1">
+                Includes material and hardware
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cabinet Preview */}
+      <div className="mt-8 p-4 bg-gray-900 rounded-lg">
+        <div className="text-white text-center mb-4">3D Preview (Coming Soon)</div>
+        <div className="h-48 bg-gray-800 rounded flex items-center justify-center">
+          <div className="text-gray-400">
+            <Box className="w-12 h-12 mx-auto mb-2" />
+            <div>Interactive 3D visualization</div>
+            <div className="text-sm">Powered by Three.js</div>
           </div>
         </div>
       </div>
     </div>
-  );
-}
-
-function calculateTotalMaterials(cabinets: Cabinet[]): Record<string, { material: Material, quantity: number }> {
-  const materials: Record<string, { material: Material, quantity: number }> = {};
-  
-  cabinets.forEach(cabinet => {
-    cabinet.components.forEach(component => {
-      const key = component.materialId;
-      if (!materials[key]) {
-        materials[key] = { material: {} as Material, quantity: 0 };
-      }
-      materials[key].quantity += component.quantity;
-    });
-  });
-  
-  return materials;
+  )
 }
