@@ -99,6 +99,85 @@ def upgrade() -> None:
     op.create_index('idx_usage_events_user_id', 'usage_events', ['user_id'])
     op.create_index('idx_usage_events_created_at', 'usage_events', ['created_at'])
 
+    # Insert default materials
+    op.bulk_insert(
+        sa.table(
+            'materials',
+            sa.Column('id', postgresql.UUID(as_uuid=True)),
+            sa.Column('name', sa.String),
+            sa.Column('type', sa.String),
+            sa.Column('thickness', sa.Numeric),
+            sa.Column('price_per_sheet', sa.Numeric),
+            sa.Column('sheet_width', sa.Numeric),
+            sa.Column('sheet_height', sa.Numeric),
+            sa.Column('is_custom', sa.Boolean),
+            sa.Column('user_id', postgresql.UUID(as_uuid=True)),
+            sa.Column('created_at', sa.DateTime),
+        ),
+        [
+            {
+                'id': '11111111-1111-1111-1111-111111111111',
+                'name': '3/4" Birch Plywood',
+                'type': 'plywood',
+                'thickness': 0.75,
+                'price_per_sheet': 75.00,
+                'sheet_width': 48.0,
+                'sheet_height': 96.0,
+                'is_custom': False,
+                'user_id': None,
+                'created_at': sa.func.now()
+            },
+            {
+                'id': '22222222-2222-2222-2222-222222222222',
+                'name': '1/2" Birch Plywood',
+                'type': 'plywood',
+                'thickness': 0.5,
+                'price_per_sheet': 55.00,
+                'sheet_width': 48.0,
+                'sheet_height': 96.0,
+                'is_custom': False,
+                'user_id': None,
+                'created_at': sa.func.now()
+            },
+            {
+                'id': '33333333-3333-3333-3333-333333333333',
+                'name': '3/4" MDF',
+                'type': 'mdf',
+                'thickness': 0.75,
+                'price_per_sheet': 45.00,
+                'sheet_width': 49.0,
+                'sheet_height': 97.0,
+                'is_custom': False,
+                'user_id': None,
+                'created_at': sa.func.now()
+            },
+            {
+                'id': '44444444-4444-4444-4444-444444444444',
+                'name': '3/4" Oak Plywood',
+                'type': 'plywood',
+                'thickness': 0.75,
+                'price_per_sheet': 95.00,
+                'sheet_width': 48.0,
+                'sheet_height': 96.0,
+                'is_custom': False,
+                'user_id': None,
+                'created_at': sa.func.now()
+            },
+            {
+                'id': '55555555-5555-5555-5555-555555555555',
+                'name': '3/4" Maple Plywood',
+                'type': 'plywood',
+                'thickness': 0.75,
+                'price_per_sheet': 85.00,
+                'sheet_width': 48.0,
+                'sheet_height': 96.0,
+                'is_custom': False,
+                'user_id': None,
+                'created_at': sa.func.now()
+            }
+        ]
+    )
+
 
 def downgrade() -> None:
     op.drop_table('usage_events')

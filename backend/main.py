@@ -7,7 +7,7 @@ import os
 from datetime import datetime
 
 from database import engine, Base
-from routes import auth, billing, projects
+from routes import auth, billing, projects, cutlists, materials
 
 
 @asynccontextmanager
@@ -38,6 +38,8 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(billing.router)
 app.include_router(projects.router)
+app.include_router(cutlists.router)
+app.include_router(materials.router)
 
 
 # Health check
