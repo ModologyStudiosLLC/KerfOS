@@ -217,6 +217,7 @@ a:focus-visible {
   display: flex;
   align-items: center;
   gap: var(--space-8);
+  /* Mobile-first: overridden by responsive section below */
 }
 
 .nav__link {
@@ -245,13 +246,7 @@ a:focus-visible {
   background-color: var(--color-cta-hover);
 }
 
-.nav__toggle {
-  display: none;
-  width: 2rem;
-  height: 2rem;
-  align-items: center;
-  justify-content: center;
-}
+/* nav__toggle base styles are in responsive section below */
 
 .nav__hamburger,
 .nav__hamburger::before,
@@ -616,52 +611,211 @@ a:focus-visible {
   color: var(--color-parchment);
 }
 
-/* ----- Mobile Responsive ----- */
-@media (max-width: 768px) {
+/* ============================================
+   Responsive Design — Mobile-First
+   ============================================ */
+
+/* ----- Mobile Navigation (off-canvas slide-in) ----- */
+.nav__toggle {
+  display: flex;
+  width: 2.75rem;
+  height: 2.75rem;
+  min-height: 44px;
+  min-width: 44px;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav__menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(80vw, 20rem);
+  flex-direction: column;
+  background-color: var(--color-parchment);
+  border-left: 1px solid var(--color-maple);
+  padding: var(--space-16) var(--space-6) var(--space-6);
+  gap: var(--space-4);
+  transform: translateX(100%);
+  transition: transform var(--transition-base);
+  z-index: 200;
+  overflow-y: auto;
+}
+
+.nav__menu.is-open {
+  transform: translateX(0);
+}
+
+/* Overlay behind mobile menu */
+.nav__overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 150;
+}
+
+.nav__overlay.is-visible {
+  display: block;
+}
+
+/* Hamburger-to-X animation */
+.nav__toggle[aria-expanded="true"] .nav__hamburger {
+  background-color: transparent;
+}
+
+.nav__toggle[aria-expanded="true"] .nav__hamburger::before {
+  top: 0;
+  transform: rotate(45deg);
+}
+
+.nav__toggle[aria-expanded="true"] .nav__hamburger::after {
+  top: 0;
+  transform: rotate(-45deg);
+}
+
+/* Mobile nav links — ensure touch targets */
+.nav__link {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ----- Mobile Base (< 768px) ----- */
+.site-header {
+  position: relative;
+}
+
+.hero__headline {
+  font-size: var(--font-size-3xl);
+}
+
+.hero__subheadline {
+  font-size: var(--font-size-base);
+}
+
+.how-it-works__steps {
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.step:not(:last-child)::after {
+  display: none;
+}
+
+.signup__field {
+  flex-direction: column;
+}
+
+.features__grid {
+  grid-template-columns: 1fr;
+}
+
+/* Prevent horizontal scroll */
+html {
+  overflow-x: hidden;
+}
+
+/* ----- Tablet (min-width: 768px) ----- */
+@media (min-width: 768px) {
   .nav__toggle {
-    display: flex;
+    display: none;
   }
 
   .nav__menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    flex-direction: column;
-    background-color: var(--color-parchment);
-    border-bottom: 1px solid var(--color-maple);
-    padding: var(--space-6);
-    gap: var(--space-4);
+    position: static;
+    width: auto;
+    flex-direction: row;
+    background-color: transparent;
+    border-left: none;
+    padding: 0;
+    gap: var(--space-8);
+    transform: none;
+    transition: none;
+    z-index: auto;
+    overflow-y: visible;
   }
 
-  .nav__menu.is-open {
-    display: flex;
+  .nav__overlay {
+    display: none !important;
   }
 
   .site-header {
-    position: relative;
-  }
-
-  .how-it-works__steps {
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-8);
-  }
-
-  .step:not(:last-child)::after {
-    display: none;
+    position: sticky;
   }
 
   .hero__headline {
-    font-size: var(--font-size-3xl);
+    font-size: var(--font-size-4xl);
   }
 
   .hero__subheadline {
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-lg);
+  }
+
+  .features__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .how-it-works__steps {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--space-12);
+  }
+
+  .step:not(:last-child)::after {
+    display: block;
   }
 
   .signup__field {
-    flex-direction: column;
+    flex-direction: row;
+  }
+}
+
+/* ----- Desktop (min-width: 1024px) ----- */
+@media (min-width: 1024px) {
+  .container {
+    padding-inline: var(--space-8);
+  }
+
+  .section {
+    padding-block: var(--space-24);
+  }
+
+  .section--lg {
+    padding-block: calc(var(--space-24) + var(--space-8));
+  }
+
+  h1 {
+    font-size: var(--font-size-5xl);
+  }
+
+  h2 {
+    font-size: var(--font-size-4xl);
+  }
+
+  .hero__headline {
+    font-size: var(--font-size-5xl);
+  }
+
+  .hero__subheadline {
+    font-size: var(--font-size-xl);
+  }
+
+  .features {
+    padding-block: calc(var(--space-24) + var(--space-8));
+  }
+
+  .features__grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .how-it-works {
+    padding-block: calc(var(--space-24) + var(--space-8));
+  }
+
+  .signup {
+    padding-block: calc(var(--space-24) + var(--space-8));
   }
 }
