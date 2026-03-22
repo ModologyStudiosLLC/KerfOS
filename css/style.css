@@ -819,3 +819,144 @@ html {
     padding-block: calc(var(--space-24) + var(--space-8));
   }
 }
+
+/* ============================================
+   Dark Mode
+   ============================================ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-walnut: #FAF6F1;
+    --color-oak: #D4A574;
+    --color-maple: #8B5E3C;
+    --color-parchment: #1A1A2E;
+    --color-white: #242440;
+    --color-black: #0F0F1E;
+    --color-gray-600: #9CA3AF;
+    --color-cta: #E07A4A;
+    --color-cta-hover: #C45D2C;
+    --color-success: #5DA06E;
+  }
+
+  body {
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Hero gradient for dark */
+  #hero {
+    background: linear-gradient(
+      135deg,
+      var(--color-parchment) 0%,
+      #1E1E36 40%,
+      #22223A 100%
+    );
+  }
+
+  /* Feature cards */
+  .feature-card {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  .feature-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  .feature-card__icon {
+    background-color: #2E2E4A;
+  }
+
+  /* Nav hamburger */
+  .nav__hamburger,
+  .nav__hamburger::before,
+  .nav__hamburger::after {
+    background-color: var(--color-walnut);
+  }
+
+  /* Signup section */
+  .signup {
+    background-color: #12122A;
+  }
+
+  .signup__input {
+    background-color: #2A2A48;
+    color: var(--color-walnut);
+    border: 2px solid #3A3A58;
+  }
+
+  .signup__input::placeholder {
+    color: var(--color-gray-600);
+  }
+
+  .signup__input:focus {
+    border-color: var(--color-cta);
+  }
+
+  /* Success/error messages */
+  .signup__success {
+    background-color: var(--color-success);
+    color: #FFFFFF;
+  }
+
+  .signup__error {
+    background-color: #C44D4D;
+    color: #FFFFFF;
+  }
+
+  .signup__error a {
+    color: #FFFFFF;
+  }
+
+  /* Footer */
+  .site-footer {
+    background-color: #0A0A18;
+  }
+
+  .site-footer__link {
+    color: var(--color-oak);
+  }
+
+  .site-footer__link:hover,
+  .site-footer__link:focus-visible {
+    color: var(--color-walnut);
+  }
+
+  /* Mobile menu overlay */
+  .nav__overlay {
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+
+  /* Nav menu mobile panel */
+  .nav__menu {
+    background-color: var(--color-parchment);
+    border-left-color: var(--color-maple);
+  }
+
+  /* Kerf callout */
+  .hero__kerf-callout {
+    background-color: #242440;
+    border-color: var(--color-maple);
+  }
+
+  /* Step connector */
+  .step:not(:last-child)::after {
+    background-color: var(--color-maple);
+  }
+
+  /* Links and buttons maintain contrast */
+  .nav__link--cta {
+    color: #FFFFFF;
+  }
+
+  .nav__link--cta:hover,
+  .nav__link--cta:focus-visible {
+    color: #FFFFFF;
+  }
+
+  .btn--cta {
+    color: #FFFFFF;
+  }
+
+  .btn--cta:hover,
+  .btn--cta:focus-visible {
+    color: #FFFFFF;
+  }
+}
