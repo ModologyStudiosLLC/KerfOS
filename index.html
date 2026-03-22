@@ -36,14 +36,29 @@
 <body>
 
   <header class="site-header" role="banner">
-    <nav class="nav" aria-label="Primary navigation">
-      <!-- Logo and navigation links -->
+    <nav class="nav container" aria-label="Primary navigation">
+      <a href="/" class="nav__logo">KerfOS</a>
+      <button class="nav__toggle" aria-expanded="false" aria-controls="nav-menu" aria-label="Toggle navigation menu">
+        <span class="nav__hamburger"></span>
+      </button>
+      <ul id="nav-menu" class="nav__menu">
+        <li><a href="#features" class="nav__link">Features</a></li>
+        <li><a href="#how-it-works" class="nav__link">How It Works</a></li>
+        <li><a href="#signup" class="nav__link nav__link--cta">Sign Up</a></li>
+      </ul>
     </nav>
   </header>
 
   <main>
     <section id="hero" class="hero" aria-labelledby="hero-heading">
-      <!-- Hero content: headline, tagline, CTA -->
+      <div class="container hero__inner">
+        <h1 id="hero-heading" class="hero__headline">Precision cabinet design for woodworkers and DIYers</h1>
+        <p class="hero__subheadline">AI-powered cabinet design tool that makes professional fabrication accessible to everyone</p>
+        <div class="hero__kerf-callout">
+          <span class="hero__kerf-phonetic">/kɜːrf/</span> — The width of material removed by a cut
+        </div>
+        <a href="#signup" class="btn btn--cta hero__cta">Join the Waitlist</a>
+      </div>
     </section>
 
     <section id="features" class="features" aria-labelledby="features-heading">
