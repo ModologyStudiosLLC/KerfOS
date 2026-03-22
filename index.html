@@ -171,12 +171,37 @@
     </section>
 
     <section id="signup" class="signup" aria-labelledby="signup-heading">
-      <!-- Email capture form -->
+      <div class="container signup__inner">
+        <h2 id="signup-heading" class="signup__heading">Get Early Access</h2>
+        <p class="signup__description">Be among the first to experience precision cabinet design. Sign up for early access and updates.</p>
+        <form class="signup__form" action="https://formspree.io/f/{FORM_ID}" method="POST">
+          <label for="signup-email" class="signup__label">Email Address</label>
+          <div class="signup__field">
+            <input
+              type="email"
+              id="signup-email"
+              name="email"
+              required
+              placeholder="you@example.com"
+              class="signup__input"
+              autocomplete="email"
+            >
+            <button type="submit" class="btn btn--cta signup__submit">Join the Waitlist</button>
+          </div>
+          <div class="signup__success" hidden>Thanks for signing up! We'll be in touch.</div>
+          <div class="signup__error" hidden>Something went wrong. Please try emailing us at <a href="mailto:hello@kerfos.com">hello@kerfos.com</a>.</div>
+          <noscript><p class="signup__noscript">Note: Submitting this form will reload the page.</p></noscript>
+        </form>
+      </div>
     </section>
   </main>
 
   <footer class="site-footer" role="contentinfo">
-    <!-- Footer content -->
+    <div class="container site-footer__inner">
+      <p class="site-footer__copyright">&copy; 2026 KerfOS</p>
+      <p class="site-footer__tagline">Precision starts with a single kerf.</p>
+      <a href="https://github.com/kerfos" class="site-footer__link">GitHub</a>
+    </div>
   </footer>
 
   <script src="js/main.js"></script>
