@@ -112,6 +112,14 @@
       });
     });
 
+    // Close on overlay click
+    var overlay = document.querySelector('.nav__overlay');
+    if (overlay) {
+      overlay.addEventListener('click', function () {
+        setNavState(false);
+      });
+    }
+
     // Close on click outside
     document.addEventListener('click', function (e) {
       if (toggle.getAttribute('aria-expanded') === 'true' &&
@@ -139,7 +147,11 @@
 
     function setNavState(open) {
       toggle.setAttribute('aria-expanded', String(open));
-      menu.classList.toggle('nav__menu--open', open);
+      menu.classList.toggle('is-open', open);
+      var overlay = document.querySelector('.nav__overlay');
+      if (overlay) {
+        overlay.classList.toggle('is-visible', open);
+      }
     }
   }
 
