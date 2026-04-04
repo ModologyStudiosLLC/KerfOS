@@ -76,13 +76,13 @@ function KerfOSLogo() {
         aria-hidden="true"
       >
         {/* Top panel */}
-        <rect x="2" y="2" width="28" height="12" rx="2.5" fill="#141414" />
+        <rect x="2" y="2" width="28" height="12" rx="0" fill="#141414" />
         {/* Bottom panel */}
-        <rect x="2" y="18" width="28" height="12" rx="2.5" fill="#141414" />
-        {/* Kerf cut line — amber precision accent */}
-        <rect x="2" y="15" width="28" height="2" rx="1" fill="#E8A030" />
+        <rect x="2" y="18" width="28" height="12" rx="0" fill="#141414" />
+        {/* Kerf cut line — precision blue accent */}
+        <rect x="2" y="15" width="28" height="2" rx="0" fill="#1B4AEF" />
         {/* CNC path indicator on top panel */}
-        <circle cx="22" cy="8" r="2" fill="#E8A030" />
+        <circle cx="22" cy="8" r="2" fill="#1B4AEF" />
         <path d="M8 8 L18 8" stroke="rgba(255,255,255,0.35)" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="2 2" />
       </svg>
       {/* Wordmark */}
@@ -150,17 +150,17 @@ export default function Navigation() {
           maxWidth: '1280px',
           margin: '0 auto',
           padding: '0 24px',
-          display: 'flex',
+          display: 'grid',
+          gridTemplateColumns: '1fr auto 1fr',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '24px',
+          gap: '16px',
         }}
       >
         {/* Logo */}
         <KerfOSLogo />
 
-        {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-1" style={{ flex: 1 }}>
+        {/* Desktop nav — centered */}
+        <div className="hidden md:flex items-center gap-1">
           {navItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
             return (
@@ -257,9 +257,11 @@ export default function Navigation() {
           })}
         </div>
 
-        {/* Right: auth CTAs */}
-        <div className="hidden md:flex items-center gap-2">
+        {/* Right column: CTAs (desktop) + hamburger (mobile) */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }}>
+          {/* Desktop CTAs */}
           <button
+            className="hidden md:inline-flex"
             style={{
               padding: '7px 14px',
               fontSize: '13px',
@@ -279,52 +281,52 @@ export default function Navigation() {
           </button>
           <Link
             href="/pricing"
-            className="k-btn k-btn-primary k-btn-sm"
+            className="k-btn k-btn-primary k-btn-sm hidden md:inline-flex"
           >
             Start free
           </Link>
-        </div>
 
-        {/* Mobile hamburger */}
-        <button
-          className="md:hidden"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Toggle menu"
-          style={{
-            width: '36px',
-            height: '36px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '5px',
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-            padding: 0,
-          }}
-        >
-          <span style={{
-            display: 'block', width: '18px', height: '1.5px',
-            background: 'var(--k-ink)',
-            transform: mobileOpen ? 'translateY(6.5px) rotate(45deg)' : 'none',
-            transition: 'transform 200ms var(--k-ease)',
-            transformOrigin: 'center',
-          }} />
-          <span style={{
-            display: 'block', width: '18px', height: '1.5px',
-            background: 'var(--k-ink)',
-            opacity: mobileOpen ? 0 : 1,
-            transition: 'opacity 150ms ease',
-          }} />
-          <span style={{
-            display: 'block', width: '18px', height: '1.5px',
-            background: 'var(--k-ink)',
-            transform: mobileOpen ? 'translateY(-6.5px) rotate(-45deg)' : 'none',
-            transition: 'transform 200ms var(--k-ease)',
-            transformOrigin: 'center',
-          }} />
-        </button>
+          {/* Mobile hamburger */}
+          <button
+            className="md:hidden"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle menu"
+            style={{
+              width: '36px',
+              height: '36px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '5px',
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0,
+            }}
+          >
+            <span style={{
+              display: 'block', width: '18px', height: '1.5px',
+              background: 'var(--k-ink)',
+              transform: mobileOpen ? 'translateY(6.5px) rotate(45deg)' : 'none',
+              transition: 'transform 200ms var(--k-ease)',
+              transformOrigin: 'center',
+            }} />
+            <span style={{
+              display: 'block', width: '18px', height: '1.5px',
+              background: 'var(--k-ink)',
+              opacity: mobileOpen ? 0 : 1,
+              transition: 'opacity 150ms ease',
+            }} />
+            <span style={{
+              display: 'block', width: '18px', height: '1.5px',
+              background: 'var(--k-ink)',
+              transform: mobileOpen ? 'translateY(-6.5px) rotate(-45deg)' : 'none',
+              transition: 'transform 200ms var(--k-ease)',
+              transformOrigin: 'center',
+            }} />
+          </button>
+        </div>
       </div>
 
       {/* Mobile drawer */}

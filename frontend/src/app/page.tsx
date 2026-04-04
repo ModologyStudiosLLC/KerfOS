@@ -111,7 +111,7 @@ function FeatureCard({
             background: accent ? 'rgba(255,255,255,0.06)' : 'var(--k-bg-subtle)',
             borderRadius: 'var(--k-r-sm)',
             fontSize: '12px',
-            color: accent ? 'var(--k-amber)' : 'var(--k-ink-3)',
+            color: accent ? 'rgba(255,255,255,0.7)' : 'var(--k-ink-3)',
             border: accent ? '1px solid rgba(255,255,255,0.08)' : '1px solid var(--k-border)',
             whiteSpace: 'pre-line',
           }}
@@ -194,7 +194,7 @@ export default function HomePage() {
         <div style={{ paddingRight: '64px' }}>
           <div className="fade-up fade-up-1" style={{ marginBottom: '20px' }}>
             <span className="k-badge k-badge-amber">
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--k-amber)', display: 'inline-block' }} />
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--k-amber)', display: 'inline-block', flexShrink: 0 }} />
               No training course required
             </span>
           </div>
@@ -290,7 +290,7 @@ export default function HomePage() {
               width: '400px',
               height: '400px',
               borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(232,160,48,0.10) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(27,74,239,0.07) 0%, transparent 70%)',
               pointerEvents: 'none',
             }}
           />
@@ -507,8 +507,8 @@ export default function HomePage() {
                 ['G-code for every major CNC', 'Not locked to one machine brand'],
               ].map(([a, b]) => (
                 <div key={a} style={{ display: 'flex', gap: '10px', marginBottom: '16px', alignItems: 'flex-start' }}>
-                  <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'var(--k-amber-soft)', border: '1px solid rgba(232,160,48,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>
-                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5L4.2 7.2L8 3" stroke="#B36A00" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'var(--k-amber-soft)', border: '1px solid rgba(27,74,239,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5L4.2 7.2L8 3" stroke="#0F2A99" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   </div>
                   <div>
                     <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--k-ink)', letterSpacing: '-0.01em' }}>{a}</div>
