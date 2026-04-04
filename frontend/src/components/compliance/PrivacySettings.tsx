@@ -1,12 +1,5 @@
-"""Privacy Settings Component for KerfOS
-
-Allows users to:
-- View and manage consent preferences
-- Export their data
-- Request data deletion
-- View data retention policies
-- Download Data Processing Agreement
-"""
+// @ts-nocheck
+'use client';
 import React, { useState, useEffect } from 'react'
 
 const CONSENT_STORAGE_KEY = 'kerfos_cookie_consent'

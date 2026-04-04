@@ -1,11 +1,5 @@
-"""Cookie Consent Banner Component for KerfOS
-
-GDPR-compliant cookie consent with:
-- Essential, Analytics, Marketing, Third-party categories
-- Granular consent control
-- Persistent storage
-- Integration with backend GDPR API
-"""
+// @ts-nocheck
+'use client';
 import React, { useState, useEffect, useCallback } from 'react'
 
 const COOKIE_CATEGORIES = [

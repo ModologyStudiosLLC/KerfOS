@@ -147,7 +147,14 @@ export function withAuth<P extends object>(Component: React.ComponentType<P>) {
     }
     
     if (!isAuthenticated) {
-      return <LoginForm />;
+      return (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <p className="text-gray-600 mb-4">Please sign in to continue.</p>
+            <a href="/" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Go Home</a>
+          </div>
+        </div>
+      );
     }
     
     return <Component {...props} />;

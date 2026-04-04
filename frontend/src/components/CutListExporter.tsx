@@ -229,7 +229,7 @@ function generatePDFHTML(
     .map(([id, { material, quantity }]) => ({
       material,
       quantity,
-      cost: quantity * material.pricePerSqFt
+      cost: quantity * (material.pricePerSqFt ?? material.price ?? 0)
     }));
   const totalCost = materialList.reduce((sum, { cost }) => sum + cost, 0);
 
@@ -288,7 +288,7 @@ function generatePDFHTML(
         <tr>
           <td>${c.name}</td>
           <td>${c.width}"W × ${c.height}"H × ${c.depth}"D</td>
-          <td>${c.components.length} parts</td>
+          <td>${(c.components ?? []).length} parts</td>
         </tr>
       `).join("")}
     </tbody>

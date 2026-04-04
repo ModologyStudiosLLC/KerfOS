@@ -86,7 +86,7 @@ export default function MaterialSelector({ selected, onSelect }: MaterialSelecto
                 </div>
                 <div className="text-right">
                   <p className="text-white font-semibold">
-                    ${material.pricePerSqFt.toFixed(2)}
+                    ${(material.pricePerSqFt ?? material.price ?? 0).toFixed(2)}
                   </p>
                   <p className="text-xs text-slate-400">/sq ft</p>
                 </div>

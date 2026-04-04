@@ -1,3 +1,4 @@
+'use client';
 import React, { useState, useEffect } from 'react';
 import { 
   Box, Typography, Paper, Button, Grid, Card, CardContent, 
@@ -307,7 +308,7 @@ const MobileCompanionApp: React.FC<MobileCompanionAppProps> = ({
               <ListItem>
                 <ListItemIcon><BuildIcon /></ListItemIcon>
                 <ListItemText 
-                  primary="3/4" Plywood" 
+                  primary='3/4" Plywood'
                   secondary="3 sheets - Kitchen Renovation"
                 />
                 <ListItemSecondaryAction>

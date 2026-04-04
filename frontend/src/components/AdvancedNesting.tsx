@@ -1,3 +1,4 @@
+'use client';
 import React, { useState, useCallback } from 'react';
 import { 
   Box, Typography, Paper, Button, Grid, Card, CardContent, 
@@ -206,10 +207,10 @@ const AdvancedNesting: React.FC<AdvancedNestingProps> = ({
             <FormControl fullWidth sx={{ mb: 2 }}>
               <InputLabel>Material</InputLabel>
               <Select value={sheetMaterial} onChange={(e) => setSheetMaterial(e.target.value)}>
-                <MenuItem value="1/2\" Plywood">1/2" Plywood</MenuItem>
-                <MenuItem value="3/4\" Plywood">3/4" Plywood</MenuItem>
-                <MenuItem value="1/2\" MDF">1/2" MDF</MenuItem>
-                <MenuItem value="3/4\" MDF">3/4" MDF</MenuItem>
+                <MenuItem value='1/2" Plywood'>1/2&quot; Plywood</MenuItem>
+                <MenuItem value='3/4" Plywood'>3/4&quot; Plywood</MenuItem>
+                <MenuItem value='1/2" MDF'>1/2&quot; MDF</MenuItem>
+                <MenuItem value='3/4" MDF'>3/4&quot; MDF</MenuItem>
                 <MenuItem value="Melamine">Melamine</MenuItem>
               </Select>
             </FormControl>

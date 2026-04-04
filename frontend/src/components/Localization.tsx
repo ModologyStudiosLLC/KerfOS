@@ -1,3 +1,4 @@
+'use client';
 /**
  * Localization Component
  * Search for local suppliers by zip code
@@ -379,7 +380,7 @@ export const Localization: React.FC = () => {
                 <Paper sx={{ p: 2, textAlign: 'center' }}>
                   <Typography variant="h4">{count}</Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {type.replace('_', ' ').title()}
+                    {type.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())}
                   </Typography>
                 </Paper>
               </Grid>
@@ -481,7 +482,7 @@ export const Localization: React.FC = () => {
                     <Accordion key={category} defaultExpanded>
                       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography variant="h6">
-                          {category.replace('_', ' ').title()} ({suppliersInCategory.length})
+                          {category.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())} ({suppliersInCategory.length})
                         </Typography>
                       </AccordionSummary>
                       <AccordionDetails>

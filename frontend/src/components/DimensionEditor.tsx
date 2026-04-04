@@ -50,16 +50,16 @@ export default function DimensionEditor({
       {/* Component List */}
       <div>
         <h3 className="text-lg font-semibold text-white mb-3">
-          Components ({cabinet.components.length})
+          Components ({cabinet.components?.length})
         </h3>
         
-        {cabinet.components.length === 0 ? (
+        {cabinet.components?.length === 0 ? (
           <p className="text-slate-400 text-sm py-4 border border-dashed border-slate-700 rounded-lg">
             No components yet. Add your first component below.
           </p>
         ) : (
           <div className="space-y-2 max-h-64 overflow-y-auto">
-            {cabinet.components.map(component => (
+            {cabinet.components?.map(component => (
               <div
                 key={component.id}
                 className="bg-slate-700/50 border border-slate-600 rounded-lg p-4"

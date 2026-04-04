@@ -3,13 +3,36 @@
 import { useState } from 'react'
 import { Ruler, Box, Scissors, DollarSign } from 'lucide-react'
 
-interface Cabinet {
+export interface Material {
+  id: number | string
+  name: string
+  price?: number
+  thickness?: number
+  type?: string
+  pricePerSqFt?: number
+  supplier?: string
+}
+
+export interface CabinetComponent {
+  id: string
+  name: string
+  width: number
+  height: number
+  depth?: number
+  material?: string
+  materialId?: string
+  quantity?: number
+}
+
+export interface Cabinet {
   id: number
   name: string
   width: number
   height: number
   depth: number
   material: string
+  materialId?: string
+  components?: CabinetComponent[]
 }
 
 export function CabinetBuilder() {

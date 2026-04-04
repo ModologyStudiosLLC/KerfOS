@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import * as THREE from "three";
-import Cabinet, { Material } from "./CabinetBuilder";
+import { Cabinet, Material } from "./CabinetBuilder";
 
 interface CabinetPreviewProps {
   cabinet: Cabinet;

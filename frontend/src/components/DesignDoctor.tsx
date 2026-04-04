@@ -127,7 +127,7 @@ const DesignDoctor: React.FC<DesignDoctorProps> = ({ design, onFixIssue }) => {
                 className={`border-l-4 rounded-lg p-4 ${getSeverityColor(issue.severity)}`}
               >
                 <div
-n                  className="flex items-start justify-between cursor-pointer"
+                  className="flex items-start justify-between cursor-pointer"
                   onClick={() => setExpandedIssue(expandedIssue === issue.id ? null : issue.id)}
                 >
                   <div className="flex items-start gap-3">

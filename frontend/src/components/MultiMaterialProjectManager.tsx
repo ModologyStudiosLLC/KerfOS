@@ -1,4 +1,5 @@
-import React, { useState, useCallback, useEffect } from 'react';
+'use client';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { 
   Box, Typography, Paper, Button, Grid, Card, CardContent, 
   Chip, Switch, FormControlLabel, Tabs, Tab, 
@@ -203,9 +204,6 @@ const MultiMaterialProjectManager: React.FC = () => {
       updatedAt: new Date().toISOString()
     });
   };
-
-  // Import for useMemo
-  const { useMemo } = React;
 
   return (
     <Box sx={{ p: 3 }}>

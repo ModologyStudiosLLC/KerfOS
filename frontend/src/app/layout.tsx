@@ -1,12 +1,36 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Sora, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
+import Navigation from '@/components/Navigation'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+})
+
+const sora = Sora({
+  subsets: ['latin'],
+  variable: '--font-sora',
+  display: 'swap',
+  weight: ['400', '500', '600', '700', '800'],
+})
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  display: 'swap',
+  weight: ['400', '500'],
+})
 
 export const metadata: Metadata = {
-  title: 'KerfOS - Cabinet Designer',
-  description: 'AI-powered cabinet design tool for woodworkers and DIYers',
+  title: 'KerfOS — CNC Cabinet Software for Serious Woodworkers',
+  description: 'Design cabinets, generate cut lists, and export G-code in minutes. No training course required.',
+  openGraph: {
+    title: 'KerfOS — CNC Cabinet Software',
+    description: 'Design cabinets, generate cut lists, and export G-code in minutes.',
+    type: 'website',
+  },
 }
 
 export default function RootLayout({
@@ -15,8 +39,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
+    <html lang="en" className={`${inter.variable} ${sora.variable} ${jetbrainsMono.variable}`}>
+      <body>
+        <Navigation />
+        <main>{children}</main>
+      </body>
     </html>
   )
 }

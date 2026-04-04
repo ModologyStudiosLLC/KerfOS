@@ -346,7 +346,7 @@ export default function ScrapTracker({
                         <div className="flex gap-2">
                           {scrap.is_usable && onScrapSelect && (
                             <button
-n                              onClick={() => onScrapSelect(scrap)}
+                              onClick={() => onScrapSelect(scrap)}
                               className="px-2 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded"
                             >
                               Use

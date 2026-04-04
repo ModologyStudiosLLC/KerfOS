@@ -218,7 +218,7 @@ const ScratchBuildCalculator: React.FC<ScratchBuildCalculatorProps> = ({ onCalcu
     onCalculate?.(calculationResult);
   };
 
-  const categories = [...new Set(tools.map(t => t.category))];
+  const categories = Array.from(new Set(tools.map(t => t.category)));
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">

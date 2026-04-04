@@ -1,3 +1,4 @@
+'use client';
 import React, { useState, useCallback, useMemo } from 'react';
 import { 
   Box, Typography, Paper, Button, Grid, Card, CardContent, 
@@ -263,7 +264,7 @@ const EdgeBanding: React.FC<EdgeBandingProps> = ({ parts: initialParts = [], onB
                   </>
                 )}
                 {selectedMaterial === 'Wood Veneer' && (
-                  <MenuItem value="1/32\"">1/32"</MenuItem>
+                  <MenuItem value='1/32"'>1/32&quot;</MenuItem>
                 )}
                 {selectedMaterial === 'Melamine' && (
                   <MenuItem value="1/2mm">1/2mm</MenuItem>
