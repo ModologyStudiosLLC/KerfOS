@@ -4,92 +4,53 @@ import { useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Grid, Environment, GizmoHelper, GizmoViewport } from "@react-three/drei";
 import * as THREE from "three";
-import { Cabinet, Material } from "./CabinetBuilder";
+import { Cabinet, Material, CanvasComponent } from "./CabinetBuilder";
+import { ComponentMesh } from "./canvas/ComponentMesh";
 
 interface CabinetPreviewProps {
   cabinet: Cabinet;
   material: Material | null;
-}
-
-// ─── Cabinet mesh ────────────────────────────────────────────────────────────
-
-function CabinetMesh({ cabinet, material }: CabinetPreviewProps) {
-  const color = getMaterialColor(material?.type);
-  const thickness = (material?.thickness ?? 0.75) / 12;
-
-  // Convert inches → feet for Three.js world units
-  const w = cabinet.width  / 12;
-  const h = cabinet.height / 12;
-  const d = cabinet.depth  / 12;
-
-  return (
-    <group position={[0, h / 2, 0]}>
-      {/* Cabinet box (hollow shell via 5 panels) */}
-
-      {/* Bottom */}
-      <mesh position={[0, -h / 2 + thickness / 2, 0]} castShadow receiveShadow>
-        <boxGeometry args={[w, thickness, d]} />
-        <meshStandardMaterial color={color} roughness={0.7} metalness={0.05} />
-      </mesh>
-
-      {/* Top */}
-      <mesh position={[0, h / 2 - thickness / 2, 0]} castShadow receiveShadow>
-        <boxGeometry args={[w, thickness, d]} />
-        <meshStandardMaterial color={color} roughness={0.7} metalness={0.05} />
-      </mesh>
-
-      {/* Left side */}
-      <mesh position={[-w / 2 + thickness / 2, 0, 0]} castShadow receiveShadow>
-        <boxGeometry args={[thickness, h, d]} />
-        <meshStandardMaterial color={color} roughness={0.7} metalness={0.05} />
-      </mesh>
-
-      {/* Right side */}
-      <mesh position={[w / 2 - thickness / 2, 0, 0]} castShadow receiveShadow>
-        <boxGeometry args={[thickness, h, d]} />
-        <meshStandardMaterial color={color} roughness={0.7} metalness={0.05} />
-      </mesh>
-
-      {/* Back */}
-      <mesh position={[0, 0, -d / 2 + thickness / 2]} castShadow receiveShadow>
-        <boxGeometry args={[w, h, thickness]} />
-        <meshStandardMaterial color={color} roughness={0.8} metalness={0.02} />
-      </mesh>
-
-      {/* Door front */}
-      <mesh position={[0, 0, d / 2 - thickness / 2]} castShadow receiveShadow>
-        <boxGeometry args={[w - thickness * 2 - 0.02, h - thickness * 2 - 0.02, thickness]} />
-        <meshStandardMaterial color={color} roughness={0.65} metalness={0.08} />
-      </mesh>
-
-      {/* Door handle */}
-      <mesh
-        position={[w / 2 - thickness * 3, 0, d / 2 + thickness * 0.5]}
-        castShadow
-      >
-        <boxGeometry args={[0.025, 0.18, 0.025]} />
-        <meshStandardMaterial color={0x888888} roughness={0.25} metalness={0.85} />
-      </mesh>
-    </group>
-  );
+  components: CanvasComponent[];
+  selectedId: string | null;
+  onSelect: (id: string | null) => void;
+  onMove: (id: string, pos: [number, number, number]) => void;
 }
 
 // ─── Scene ───────────────────────────────────────────────────────────────────
 
-function Scene({ cabinet, material }: CabinetPreviewProps) {
+function Scene({ cabinet, material, components, selectedId, onSelect, onMove }: CabinetPreviewProps) {
+  const orbitRef = useRef<any>(null);
+  const color = getMaterialColor(material?.type);
+
   return (
     <>
       <Environment preset="studio" />
-
       <ambientLight intensity={0.4} />
-      <directionalLight
-        position={[5, 10, 7]}
-        intensity={1.2}
-        castShadow
-        shadow-mapSize={[1024, 1024]}
-      />
+      <directionalLight position={[5, 10, 7]} intensity={1.2} castShadow shadow-mapSize={[1024, 1024]} />
 
-      <CabinetMesh cabinet={cabinet} material={material} />
+      {/* All components */}
+      {components.map(comp => (
+        <ComponentMesh
+          key={comp.id}
+          comp={comp}
+          materialColor={color}
+          isSelected={comp.id === selectedId}
+          onSelect={onSelect}
+          onMove={onMove}
+          orbitRef={orbitRef}
+        />
+      ))}
+
+      {/* Deselect on canvas background click */}
+      <mesh
+        position={[0, -0.01, 0]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        onClick={() => onSelect(null)}
+        visible={false}
+      >
+        <planeGeometry args={[200, 200]} />
+        <meshBasicMaterial />
+      </mesh>
 
       <Grid
         position={[0, 0, 0]}
@@ -106,11 +67,12 @@ function Scene({ cabinet, material }: CabinetPreviewProps) {
       />
 
       <OrbitControls
+        ref={orbitRef}
         makeDefault
         enableDamping
         dampingFactor={0.08}
         minDistance={1}
-        maxDistance={20}
+        maxDistance={30}
         maxPolarAngle={Math.PI / 2.05}
       />
 
@@ -126,35 +88,26 @@ function Scene({ cabinet, material }: CabinetPreviewProps) {
 
 // ─── Export ──────────────────────────────────────────────────────────────────
 
-export default function CabinetPreview({ cabinet, material }: CabinetPreviewProps) {
+export default function CabinetPreview(props: CabinetPreviewProps) {
+  const { cabinet } = props;
   const h = cabinet.height / 12;
 
   return (
     <div style={{ width: "100%", height: "100%", background: "var(--k-canvas-bg)" }}>
       <Canvas
         shadows
-        camera={{
-          position: [h * 1.6, h * 1.2, h * 2.2],
-          fov: 42,
-          near: 0.01,
-          far: 100,
-        }}
+        camera={{ position: [h * 1.6, h * 1.2, h * 2.2], fov: 42, near: 0.01, far: 100 }}
         gl={{ antialias: true }}
       >
-        <Scene cabinet={cabinet} material={material} />
+        <Scene {...props} />
       </Canvas>
 
       {/* Dimension overlay */}
       <div style={{
-        position: "absolute",
-        bottom: "16px",
-        left: "16px",
-        background: "rgba(26,18,11,0.85)",
-        backdropFilter: "blur(8px)",
+        position: "absolute", bottom: "16px", left: "16px",
+        background: "rgba(26,18,11,0.85)", backdropFilter: "blur(8px)",
         border: "1px solid var(--k-canvas-border)",
-        padding: "8px 12px",
-        borderRadius: "3px",
-        pointerEvents: "none",
+        padding: "8px 12px", borderRadius: "3px", pointerEvents: "none",
       }}>
         <div style={{ fontSize: "11px", fontWeight: 600, color: "var(--k-canvas-text)", marginBottom: "2px" }}>
           {cabinet.name}
