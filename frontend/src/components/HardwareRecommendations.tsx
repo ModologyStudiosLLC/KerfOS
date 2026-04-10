@@ -255,6 +255,7 @@ const HardwareRecommendations: React.FC<HardwareRecommendationsProps> = ({
     return groups;
   }, [filteredRecommendations]);
 
+  // @ts-ignore – MUI union type complexity exceeds TS limit; runtime safe
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>
