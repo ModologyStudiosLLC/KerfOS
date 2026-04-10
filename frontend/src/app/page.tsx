@@ -535,75 +535,110 @@ export default function HomePage() {
       </section>
 
       {/* ── PRICING ──────────────────────────────────────────────────── */}
-      <section id="pricing" style={{ padding: '96px 40px', maxWidth: '1280px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: '56px' }}>
-          <p className="k-label" style={{ marginBottom: '12px' }}>Pricing</p>
-          <h2 className="k-heading-lg">
-            Pay for what you use.{' '}
-            <span style={{ color: 'var(--k-ink-3)', fontWeight: 400 }}>Cancel anytime.</span>
-          </h2>
-        </div>
+      <section id="pricing" style={{ padding: '96px 40px', background: 'var(--k-bg-subtle)' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+            <p className="k-label" style={{ marginBottom: '12px' }}>Pricing</p>
+            <h2 className="k-heading-lg">
+              Pay for what you use.{' '}
+              <span style={{ color: 'var(--k-ink-3)', fontWeight: 400 }}>Cancel anytime.</span>
+            </h2>
+          </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }} className="pricing-grid">
-          {PLANS.map((plan) => (
-            <div
-              key={plan.name}
-              style={{
-                padding: '28px 24px',
-                borderRadius: 'var(--k-r-lg)',
-                border: plan.highlighted ? '1.5px solid var(--k-amber)' : '1px solid var(--k-border)',
-                background: 'var(--k-surface)',
-                boxShadow: plan.highlighted ? 'var(--k-shadow-md), 0 0 0 4px var(--k-amber-soft)' : 'var(--k-shadow-xs)',
-                position: 'relative',
-              }}
-            >
-              {plan.highlighted && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', alignItems: 'start' }} className="pricing-grid">
+            {PLANS.map((plan) => {
+              const dark = plan.highlighted
+              return (
                 <div
+                  key={plan.name}
                   style={{
-                    position: 'absolute',
-                    top: '-13px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                  }}
+                    padding: '28px 24px',
+                    borderRadius: '4px',
+                    border: dark ? 'none' : '1px solid var(--k-border)',
+                    background: dark ? '#0a0e1c' : 'var(--k-surface)',
+                    boxShadow: dark ? '0 20px 60px rgba(10,14,28,0.25)' : 'var(--k-shadow-xs)',
+                    position: 'relative',
+                    marginTop: dark ? '-12px' : '0',
+                    paddingTop: dark ? '36px' : '28px',
+                    paddingBottom: dark ? '36px' : '28px',
+                  } as React.CSSProperties}
                 >
-                  <span className="k-badge k-badge-amber">Most popular</span>
-                </div>
-              )}
+                  {dark && (
+                    <div style={{ marginBottom: '12px' }}>
+                      <span style={{
+                        display: 'inline-block',
+                        padding: '3px 10px',
+                        borderRadius: '2px',
+                        background: 'rgba(6,182,212,0.15)',
+                        border: '1px solid rgba(6,182,212,0.25)',
+                        fontSize: '10px', fontWeight: 700,
+                        letterSpacing: '0.08em', textTransform: 'uppercase',
+                        color: '#06b6d4',
+                      }}>Most popular</span>
+                    </div>
+                  )}
 
-              <div style={{ marginBottom: '20px' }}>
-                <div style={{ fontFamily: 'var(--font-sora), Sora, sans-serif', fontWeight: 700, fontSize: '16px', letterSpacing: '-0.025em', marginBottom: '4px' }}>{plan.name}</div>
-                <div style={{ fontSize: '12px', color: 'var(--k-ink-3)' }}>{plan.desc}</div>
-              </div>
-
-              <div style={{ marginBottom: '24px' }}>
-                <span style={{ fontFamily: 'var(--font-sora), Sora, sans-serif', fontWeight: 700, fontSize: '36px', letterSpacing: '-0.04em', color: 'var(--k-ink)' }}>
-                  {plan.price === 0 ? 'Free' : `$${plan.price}`}
-                </span>
-                {plan.price > 0 && (
-                  <span style={{ fontSize: '13px', color: 'var(--k-ink-3)', marginLeft: '4px' }}>/mo</span>
-                )}
-              </div>
-
-              <Link
-                href="/pricing"
-                className={`k-btn ${plan.highlighted ? 'k-btn-amber' : 'k-btn-ghost'}`}
-                style={{ width: '100%', justifyContent: 'center', marginBottom: '20px', display: 'inline-flex' }}
-              >
-                {plan.cta}
-              </Link>
-
-              <div style={{ borderTop: '1px solid var(--k-border)', paddingTop: '16px' }}>
-                {plan.features.map((f) => (
-                  <div key={f} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginBottom: '8px' }}>
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ marginTop: '2px', flexShrink: 0 }}>
-                      <path d="M3 7L6 10L11 4" stroke={plan.highlighted ? 'var(--k-amber-dark)' : 'var(--k-ink-3)'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <span style={{ fontSize: '13px', color: 'var(--k-ink-2)', lineHeight: 1.5 }}>{f}</span>
+                  <div style={{ marginBottom: '20px' }}>
+                    <div style={{
+                      fontFamily: 'var(--font-sora), Sora, sans-serif',
+                      fontWeight: 700, fontSize: '15px',
+                      letterSpacing: '-0.02em', marginBottom: '4px',
+                      color: dark ? '#f5f0eb' : 'var(--k-ink)',
+                    }}>{plan.name}</div>
+                    <div style={{ fontSize: '12px', color: dark ? 'rgba(245,240,235,0.45)' : 'var(--k-ink-4)' }}>{plan.desc}</div>
                   </div>
-                ))}
-              </div>
-            </div>
-          ))}
+
+                  <div style={{ marginBottom: '24px' }}>
+                    <span style={{
+                      fontFamily: 'var(--font-sora), Sora, sans-serif',
+                      fontWeight: 700, fontSize: '40px',
+                      letterSpacing: '-0.04em',
+                      color: dark ? '#f5f0eb' : 'var(--k-ink)',
+                    }}>
+                      {plan.price === 0 ? 'Free' : `$${plan.price}`}
+                    </span>
+                    {plan.price > 0 && (
+                      <span style={{ fontSize: '13px', color: dark ? 'rgba(245,240,235,0.4)' : 'var(--k-ink-4)', marginLeft: '4px' }}>/mo</span>
+                    )}
+                  </div>
+
+                  <Link
+                    href="/design/builder"
+                    style={{
+                      display: 'inline-flex',
+                      width: '100%',
+                      justifyContent: 'center',
+                      marginBottom: '24px',
+                      padding: '10px 16px',
+                      borderRadius: '3px',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      textDecoration: 'none',
+                      transition: 'opacity 150ms ease',
+                      background: dark ? '#06b6d4' : 'transparent',
+                      color: dark ? '#0a0e1c' : 'var(--k-ink-2)',
+                      border: dark ? 'none' : '1px solid var(--k-border-mid)',
+                    }}
+                  >
+                    {plan.cta}
+                  </Link>
+
+                  <div style={{ borderTop: `1px solid ${dark ? 'rgba(245,240,235,0.08)' : 'var(--k-border)'}`, paddingTop: '16px' }}>
+                    {plan.features.map((f) => (
+                      <div key={f} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', marginBottom: '10px' }}>
+                        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" style={{ marginTop: '2px', flexShrink: 0 }}>
+                          <path d="M2.5 6.5L5.5 9.5L10.5 3.5"
+                            stroke={dark ? '#06b6d4' : 'var(--k-ink-3)'}
+                            strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        <span style={{ fontSize: '13px', lineHeight: 1.5, color: dark ? 'rgba(245,240,235,0.65)' : 'var(--k-ink-2)' }}>{f}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </div>
       </section>
 
