@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 /* ─── Scroll Progress Bar ─────────────────────────────────────────────────── */
 function ScrollBar() {
@@ -17,31 +17,6 @@ function ScrollBar() {
   return <div className="k-scroll-bar" style={{ width: `${width}%` }} />
 }
 
-/* ─── Counter ─────────────────────────────────────────────────────────────── */
-function Counter({ target, suffix = '' }: { target: number; suffix?: string }) {
-  const [val, setVal] = useState(0)
-  const ref = useRef<HTMLSpanElement>(null)
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const obs = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) return
-      obs.disconnect()
-      const start = performance.now()
-      const duration = 1400
-      const tick = (now: number) => {
-        const p = Math.min((now - start) / duration, 1)
-        const eased = 1 - Math.pow(1 - p, 3)
-        setVal(Math.floor(eased * target))
-        if (p < 1) requestAnimationFrame(tick)
-      }
-      requestAnimationFrame(tick)
-    }, { threshold: 0.5 })
-    obs.observe(el)
-    return () => obs.disconnect()
-  }, [target])
-  return <span ref={ref}>{val.toLocaleString()}{suffix}</span>
-}
 
 /* ─── Feature card for bento grid ────────────────────────────────────────── */
 function FeatureCard({
@@ -248,9 +223,9 @@ export default function HomePage() {
             }}
           >
             {[
-              { n: 3200, s: '+', label: 'Builds exported' },
-              { n: 94, s: '%', label: 'Board yield avg.' },
-              { n: 12, s: 'min', label: 'Avg. first cut list' },
+              { val: '$0', label: 'Free tier, no credit card' },
+              { val: '100%', label: 'Browser-based, no install' },
+              { val: '6+', label: 'CNC machine formats' },
             ].map((stat) => (
               <div key={stat.label}>
                 <div
@@ -263,7 +238,7 @@ export default function HomePage() {
                     lineHeight: 1,
                   }}
                 >
-                  <Counter target={stat.n} suffix={stat.s} />
+                  {stat.val}
                 </div>
                 <div style={{ fontSize: '12px', color: 'var(--k-ink-4)', marginTop: '4px', letterSpacing: '0.02em' }}>
                   {stat.label}
@@ -290,7 +265,7 @@ export default function HomePage() {
               width: '400px',
               height: '400px',
               borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(27,74,239,0.07) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(6,182,212,0.07) 0%, transparent 70%)',
               pointerEvents: 'none',
             }}
           />
@@ -507,8 +482,8 @@ export default function HomePage() {
                 ['G-code for every major CNC', 'Not locked to one machine brand'],
               ].map(([a, b]) => (
                 <div key={a} style={{ display: 'flex', gap: '10px', marginBottom: '16px', alignItems: 'flex-start' }}>
-                  <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'var(--k-amber-soft)', border: '1px solid rgba(27,74,239,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>
-                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5L4.2 7.2L8 3" stroke="#0F2A99" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'var(--k-amber-soft)', border: '1px solid rgba(6,182,212,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5L4.2 7.2L8 3" stroke="#0e7490" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   </div>
                   <div>
                     <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--k-ink)', letterSpacing: '-0.01em' }}>{a}</div>
@@ -661,9 +636,9 @@ export default function HomePage() {
       <footer style={{ padding: '48px 40px 40px', borderTop: '1px solid var(--k-border)', background: 'var(--k-bg)' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '48px' }} className="footer-grid">
           <div>
-            <div style={{ fontFamily: 'var(--font-sora), Sora, sans-serif', fontWeight: 700, fontSize: '18px', letterSpacing: '-0.04em', marginBottom: '10px' }}>
-              <span style={{ color: 'var(--k-ink)' }}>Kerf</span>
-              <span style={{ color: 'var(--k-ink-3)', fontWeight: 400 }}>OS</span>
+            <div style={{ fontFamily: 'var(--font-sora), Sora, sans-serif', fontWeight: 700, fontSize: '18px', letterSpacing: '-0.04em', marginBottom: '10px', display: 'flex', alignItems: 'baseline', gap: '1px' }}>
+              <span style={{ color: '#0a0e1c' }}>Kerf</span>
+              <span style={{ color: '#06b6d4', fontWeight: 400 }}>OS</span>
             </div>
             <p style={{ fontSize: '13px', color: 'var(--k-ink-3)', lineHeight: 1.65, maxWidth: '260px' }}>
               Precision cabinet software for woodworkers who know what a kerf is.

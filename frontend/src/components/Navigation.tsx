@@ -66,24 +66,28 @@ const navItems = [
 function KerfOSLogo() {
   return (
     <Link href="/" className="flex items-center gap-3 group" aria-label="KerfOS home">
-      {/* Logomark: two stacked panels with a precision kerf cut */}
+      {/* Logomark: diagonal split — dark navy upper, cyan lower, kerf line */}
       <svg
-        width="32"
-        height="32"
-        viewBox="0 0 32 32"
+        width="30"
+        height="30"
+        viewBox="0 0 56 56"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         aria-hidden="true"
       >
-        {/* Top panel */}
-        <rect x="2" y="2" width="28" height="12" rx="0" fill="#141414" />
-        {/* Bottom panel */}
-        <rect x="2" y="18" width="28" height="12" rx="0" fill="#141414" />
-        {/* Kerf cut line — precision blue accent */}
-        <rect x="2" y="15" width="28" height="2" rx="0" fill="#1B4AEF" />
-        {/* CNC path indicator on top panel */}
-        <circle cx="22" cy="8" r="2" fill="#1B4AEF" />
-        <path d="M8 8 L18 8" stroke="rgba(255,255,255,0.35)" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="2 2" />
+        <defs>
+          <clipPath id="nav-u"><polygon points="0,0 56,0 0,56"/></clipPath>
+          <clipPath id="nav-l"><polygon points="56,0 56,56 0,56"/></clipPath>
+          <filter id="nav-g" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="1.5" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <rect x="0" y="0" width="54" height="54" rx="4" fill="#0a0e1c" clipPath="url(#nav-u)"/>
+        <g transform="translate(2, 2)">
+          <rect x="0" y="0" width="54" height="54" rx="4" fill="#06b6d4" clipPath="url(#nav-l)"/>
+        </g>
+        <line x1="1" y1="1" x2="55" y2="55" stroke="#00e5ff" strokeWidth="1.5" strokeLinecap="round" filter="url(#nav-g)"/>
       </svg>
       {/* Wordmark */}
       <div className="flex items-baseline gap-0.5">
@@ -93,7 +97,7 @@ function KerfOSLogo() {
             fontWeight: 700,
             fontSize: '18px',
             letterSpacing: '-0.04em',
-            color: '#141414',
+            color: '#0a0e1c',
             lineHeight: 1,
           }}
         >
@@ -105,7 +109,7 @@ function KerfOSLogo() {
             fontWeight: 400,
             fontSize: '18px',
             letterSpacing: '-0.02em',
-            color: '#787878',
+            color: '#06b6d4',
             lineHeight: 1,
           }}
         >

@@ -19,11 +19,11 @@
   --k-ink-3:        #787878;
   --k-ink-4:        #A8A8A8;
 
-  --k-amber:        #1B4AEF;
-  --k-amber-mid:    #1438CC;
-  --k-amber-dark:   #0F2A99;
-  --k-amber-soft:   rgba(27, 74, 239, 0.08);
-  --k-amber-glow:   rgba(27, 74, 239, 0.22);
+  --k-amber:        #06b6d4;
+  --k-amber-mid:    #0891b2;
+  --k-amber-dark:   #0e7490;
+  --k-amber-soft:   rgba(6, 182, 212, 0.08);
+  --k-amber-glow:   rgba(6, 182, 212, 0.22);
 
   /* Shadows */
   --k-shadow-xs:    0 1px 2px rgba(0,0,0,0.05);
@@ -310,7 +310,7 @@ body {
 .k-badge-amber {
   background: var(--k-amber-soft);
   color: var(--k-amber-dark);
-  border: 1px solid rgba(27, 74, 239, 0.18);
+  border: 1px solid rgba(6, 182, 212, 0.18);
 }
 
 .k-badge-neutral {

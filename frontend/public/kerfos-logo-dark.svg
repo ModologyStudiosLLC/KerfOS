@@ -1,0 +1,47 @@
+<svg viewBox="0 0 320 80" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="KerfOS">
+  <defs>
+    <clipPath id="upper-clip-d">
+      <polygon points="0,0 56,0 0,56"/>
+    </clipPath>
+    <clipPath id="lower-clip-d">
+      <polygon points="56,0 56,56 0,56"/>
+    </clipPath>
+    <filter id="glow-d" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Dark bg pill -->
+  <rect width="320" height="80" rx="8" fill="#0a0e1c"/>
+
+  <!-- Upper-right piece: slightly lighter navy -->
+  <g transform="translate(11, 11)">
+    <rect x="-2" y="-2" width="60" height="60" rx="3" fill="#1e2a42" clip-path="url(#upper-clip-d)"/>
+  </g>
+
+  <!-- Lower-left piece: cyan -->
+  <g transform="translate(13, 13)">
+    <rect x="-2" y="-2" width="60" height="60" rx="3" fill="#06b6d4" clip-path="url(#lower-clip-d)"/>
+  </g>
+
+  <!-- Kerf line -->
+  <line
+    x1="11" y1="11"
+    x2="67" y2="67"
+    stroke="#00e5ff"
+    stroke-width="1.2"
+    stroke-linecap="round"
+    filter="url(#glow-d)"
+  />
+
+  <!-- Wordmark -->
+  <text
+    x="86" y="53"
+    font-family="-apple-system, BlinkMacSystemFont, 'Inter', 'Helvetica Neue', sans-serif"
+    font-size="36"
+    font-weight="700"
+    letter-spacing="-1"
+    fill="#f1f5f9"
+  >Kerf<tspan fill="#06b6d4" letter-spacing="-0.5">OS</tspan></text>
+</svg>
