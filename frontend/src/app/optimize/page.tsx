@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import { Scissors, Grid, Archive, Stethoscope, DollarSign, BarChart } from 'lucide-react'
 import { ToolCard } from '@/components/ToolCard'

@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import { Image, Trophy } from 'lucide-react'
 import { ToolCard } from '@/components/ToolCard'

@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import { Square, Layers, FileImage, ScanLine, ScanFace } from 'lucide-react'
 import { ToolCard } from '@/components/ToolCard'

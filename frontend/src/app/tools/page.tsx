@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import { MapPin, ShoppingCart, Calculator, Thermometer, History } from 'lucide-react'
 

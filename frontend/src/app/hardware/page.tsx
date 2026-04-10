@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import { Search, Star } from 'lucide-react'
 import { ToolCard } from '@/components/ToolCard'

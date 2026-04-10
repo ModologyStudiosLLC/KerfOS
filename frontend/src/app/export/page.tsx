@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import { Terminal, Box } from 'lucide-react'
 import { ToolCard } from '@/components/ToolCard'
