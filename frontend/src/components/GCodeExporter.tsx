@@ -48,6 +48,7 @@ export default function GCodeExporter({ cabinets, onGCodeGenerated }: GCodeExpor
       setError(null);
 
       // Build cut list client-side from cabinet dimensions
+      const SHEET_W = 48, SHEET_H = 96, GAP = 0.5;
       const cutList = cabinets.flatMap((cab, sheetIdx) => {
         const parts = [
           { partName: `${cab.name} Bottom/Top`, partId: `${cab.id}-bt`, width: cab.width, height: cab.depth, quantity: 2 },
@@ -55,9 +56,18 @@ export default function GCodeExporter({ cabinets, onGCodeGenerated }: GCodeExpor
           { partName: `${cab.name} Back`,        partId: `${cab.id}-bk`, width: cab.width,  height: cab.height, quantity: 1 },
           { partName: `${cab.name} Shelves`,     partId: `${cab.id}-sh`, width: cab.width - 1.5, height: cab.depth - 1.5, quantity: 2 },
         ];
-        return { sheetNumber: sheetIdx + 1, width: 48, height: 96, cuts: parts.flatMap(p =>
-          Array.from({ length: p.quantity }, (_, i) => ({ ...p, partId: `${p.partId}-${i}`, quantity: 1 }))
-        )};
+        // Expand quantity and assign x/y positions (simple row nesting)
+        const flat: Array<{ partName: string; partId: string; width: number; height: number; x: number; y: number }> = [];
+        let curX = GAP, curY = GAP, rowH = 0;
+        for (const p of parts) {
+          for (let i = 0; i < p.quantity; i++) {
+            if (curX + p.width > SHEET_W - GAP) { curY += rowH + GAP; curX = GAP; rowH = 0; }
+            flat.push({ partName: p.partName, partId: `${p.partId}-${i}`, width: p.width, height: p.height, x: curX, y: curY });
+            curX += p.width + GAP;
+            rowH = Math.max(rowH, p.height);
+          }
+        }
+        return { sheetNumber: sheetIdx + 1, width: SHEET_W, height: SHEET_H, cuts: flat };
       });
 
       const cutListData = { cutList, totalSheets: cabinets.length };

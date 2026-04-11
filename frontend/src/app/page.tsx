@@ -19,7 +19,7 @@ const DEMO_COMPONENTS: CanvasComponent[] = [
   { id: 'd1', type: 'box',     name: 'Cabinet Box',   width: 24,   height: 34.5, depth: 23.75, position: [0, 17.25, 0] },
   { id: 'd2', type: 'shelf',   name: 'Lower Shelf',   width: 22.5, height: 0.75, depth: 21.5,  position: [0, 10,    0] },
   { id: 'd3', type: 'shelf',   name: 'Upper Shelf',   width: 22.5, height: 0.75, depth: 21.5,  position: [0, 22,    0] },
-  { id: 'd4', type: 'divider', name: 'Center Divider',width: 0.75, height: 30,   depth: 21.5,  position: [5, 16.5,  0] },
+  { id: 'd4', type: 'divider', name: 'Center Divider',width: 0.75, height: 33,   depth: 21.5,  position: [5, 17.25, 0] },
 ]
 
 /* ─── Scroll Progress Bar ─────────────────────────────────────────────────── */

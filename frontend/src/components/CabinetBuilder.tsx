@@ -419,6 +419,13 @@ export function CabinetBuilder() {
 
   const [viewPreset, setViewPreset] = useState<ViewPreset>('perspective')
 
+  // Persist cabinet + components to localStorage so /export/gcode can read them
+  useEffect(() => {
+    try {
+      localStorage.setItem('kerfos_cabinet', JSON.stringify({ cabinet, components }))
+    } catch {}
+  }, [cabinet, components])
+
   const selectedMaterial = MATERIALS.find(m => m.name === cabinet.material) ?? MATERIALS[0]
   const selectedComp = components.find(c => c.id === selectedId) ?? null
 
