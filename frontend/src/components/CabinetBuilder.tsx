@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import dynamic from 'next/dynamic'
+import { AIRail } from './canvas/AIRail'
+import { runLocalDesignChecks } from '../lib/designDoctor'
 
 const CabinetPreview = dynamic(() => import('./CabinetPreview'), { ssr: false })
 
@@ -426,6 +428,33 @@ export function CabinetBuilder() {
     } catch {}
   }, [cabinet, components])
 
+  // ── DFM violations ───────────────────────────────────────────────────────
+  const violations = useMemo((): Record<string, 'critical' | 'warning' | 'info'> => {
+    const design = {
+      id: String(cabinet.id), name: cabinet.name,
+      width: cabinet.width, height: cabinet.height, depth: cabinet.depth,
+      material: cabinet.material,
+      components: components.map(c => ({ id: c.id, name: c.name, width: c.width, height: c.height, depth: c.depth, material: cabinet.material })),
+    }
+    const result = runLocalDesignChecks(design)
+    const map: Record<string, 'critical' | 'warning' | 'info'> = {}
+    for (const issue of result.issues) {
+      if (issue.affectedComponent) {
+        // affectedComponent may be a name or id — match by either
+        const comp = components.find(c => c.id === issue.affectedComponent || c.name === issue.affectedComponent)
+        if (comp) map[comp.id] = issue.severity
+      }
+    }
+    // Shelf sag check (local, not in designDoctor)
+    for (const c of components) {
+      if (c.type === 'shelf' && c.width > 36) {
+        const existing = map[c.id]
+        if (!existing || existing === 'info') map[c.id] = 'warning'
+      }
+    }
+    return map
+  }, [cabinet, components])
+
   const selectedMaterial = MATERIALS.find(m => m.name === cabinet.material) ?? MATERIALS[0]
   const selectedComp = components.find(c => c.id === selectedId) ?? null
 
@@ -789,6 +818,7 @@ export function CabinetBuilder() {
             onSelect={setSelectedId}
             onMove={handleMove}
             viewPreset={viewPreset}
+            violations={violations}
           />
 
           {/* Hint bar */}
@@ -908,6 +938,9 @@ export function CabinetBuilder() {
                     onClick={() => setSelectedId(c.id)}
                   />
                 ))}
+
+                <div style={s.divider} />
+                <AIRail cabinet={cabinet} selectedComp={selectedComp} />
               </>
             )}
           </div>

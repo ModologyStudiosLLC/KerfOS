@@ -228,9 +228,22 @@ const PLANS = [
 ]
 
 /* ─── Main Page ───────────────────────────────────────────────────────────── */
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'KerfOS',
+  applicationCategory: 'DesignApplication',
+  operatingSystem: 'Web',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  description: 'CNC cabinet design software. Design parametric cabinets, generate cut lists, and export G-code for ShopBot, Shapeoko, X-Carve, and any GRBL machine.',
+  url: 'https://kerfos.com',
+  creator: { '@type': 'Organization', name: 'Modology Studios', url: 'https://modologystudios.com' },
+}
+
 export default function HomePage() {
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <ScrollBar />
 
       {/* ── HERO ─────────────────────────────────────────────────────── */}

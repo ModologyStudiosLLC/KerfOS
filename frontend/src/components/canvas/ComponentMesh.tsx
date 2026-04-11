@@ -2,9 +2,11 @@
 
 import { useRef } from "react";
 import { ThreeEvent } from "@react-three/fiber";
-import { TransformControls } from "@react-three/drei";
+import { TransformControls, Html } from "@react-three/drei";
 import * as THREE from "three";
 import { CanvasComponent } from "../CabinetBuilder";
+
+export interface ViolationLevel { level: 'critical' | 'warning' | 'info' }
 
 interface ComponentMeshProps {
   comp: CanvasComponent;
@@ -13,12 +15,25 @@ interface ComponentMeshProps {
   onSelect: (id: string) => void;
   onMove: (id: string, pos: [number, number, number]) => void;
   orbitRef: React.RefObject<any>;
+  violation?: 'critical' | 'warning' | 'info';
 }
 
 const T = 0.75 / 12; // 3/4" panel thickness in feet
+const SNAP = 0.25;   // snap grid in inches
 
-// ─── Hollow cabinet shell (5 panels, open front) ──────────────────────────────
+function snapInch(val: number): number {
+  return Math.round(val / SNAP) * SNAP;
+}
 
+// ─── Violation emissive ───────────────────────────────────────────────────────
+function violationEmissive(v?: 'critical' | 'warning' | 'info') {
+  if (v === 'critical') return { emissive: '#ef4444', emissiveIntensity: 0.55 };
+  if (v === 'warning')  return { emissive: '#f59e0b', emissiveIntensity: 0.45 };
+  if (v === 'info')     return { emissive: '#60a5fa', emissiveIntensity: 0.35 };
+  return null;
+}
+
+// ─── Hollow cabinet shell ─────────────────────────────────────────────────────
 interface MatProps {
   color: THREE.ColorRepresentation;
   roughness: number;
@@ -31,39 +46,47 @@ function HollowBox({ w, h, d, ...mat }: { w: number; h: number; d: number } & Ma
   const m = <meshStandardMaterial {...mat} />;
   return (
     <>
-      {/* Back panel */}
-      <mesh position={[0, 0, -d / 2 + T / 2]} castShadow receiveShadow>
-        <boxGeometry args={[w, h, T]} />{m}
-      </mesh>
-      {/* Left side */}
-      <mesh position={[-w / 2 + T / 2, 0, 0]} castShadow receiveShadow>
-        <boxGeometry args={[T, h, d]} />{m}
-      </mesh>
-      {/* Right side */}
-      <mesh position={[w / 2 - T / 2, 0, 0]} castShadow receiveShadow>
-        <boxGeometry args={[T, h, d]} />{m}
-      </mesh>
-      {/* Top panel */}
-      <mesh position={[0, h / 2 - T / 2, 0]} castShadow receiveShadow>
-        <boxGeometry args={[w - T * 2, T, d]} />{m}
-      </mesh>
-      {/* Bottom panel */}
-      <mesh position={[0, -h / 2 + T / 2, 0]} castShadow receiveShadow>
-        <boxGeometry args={[w - T * 2, T, d]} />{m}
-      </mesh>
+      <mesh position={[0, 0, -d / 2 + T / 2]} castShadow receiveShadow><boxGeometry args={[w, h, T]} />{m}</mesh>
+      <mesh position={[-w / 2 + T / 2, 0, 0]} castShadow receiveShadow><boxGeometry args={[T, h, d]} />{m}</mesh>
+      <mesh position={[w / 2 - T / 2, 0, 0]} castShadow receiveShadow><boxGeometry args={[T, h, d]} />{m}</mesh>
+      <mesh position={[0, h / 2 - T / 2, 0]} castShadow receiveShadow><boxGeometry args={[w - T * 2, T, d]} />{m}</mesh>
+      <mesh position={[0, -h / 2 + T / 2, 0]} castShadow receiveShadow><boxGeometry args={[w - T * 2, T, d]} />{m}</mesh>
     </>
   );
 }
 
-// ─── Component mesh ───────────────────────────────────────────────────────────
+// ─── Measurement label overlay ────────────────────────────────────────────────
+function MeasurementLabel({ w, h, d }: { w: number; h: number; d: number }) {
+  // Convert from feet back to inches for display
+  const wi = (w * 12).toFixed(2);
+  const hi = (h * 12).toFixed(2);
+  const di = (d * 12).toFixed(2);
+  return (
+    <Html
+      position={[0, h / 2 + 0.12, 0]}
+      center
+      distanceFactor={6}
+      style={{ pointerEvents: 'none', userSelect: 'none' }}
+    >
+      <div style={{
+        display: 'flex', gap: '6px',
+        background: 'rgba(10,14,28,0.88)', backdropFilter: 'blur(8px)',
+        border: '1px solid rgba(232,201,154,0.25)', borderRadius: '3px',
+        padding: '4px 8px', whiteSpace: 'nowrap',
+      }}>
+        {[{ l: 'W', v: wi }, { l: 'H', v: hi }, { l: 'D', v: di }].map(({ l, v }) => (
+          <span key={l} style={{ fontFamily: 'monospace', fontSize: '10px', color: '#e8c99a', letterSpacing: '0.04em' }}>
+            <span style={{ opacity: 0.5 }}>{l} </span>{v}″
+          </span>
+        ))}
+      </div>
+    </Html>
+  );
+}
 
+// ─── Component mesh ───────────────────────────────────────────────────────────
 export function ComponentMesh({
-  comp,
-  materialColor,
-  isSelected,
-  onSelect,
-  onMove,
-  orbitRef,
+  comp, materialColor, isSelected, onSelect, onMove, orbitRef, violation,
 }: ComponentMeshProps) {
   const groupRef = useRef<THREE.Group>(null!);
 
@@ -74,12 +97,13 @@ export function ComponentMesh({
   const py = comp.position[1] / 12;
   const pz = comp.position[2] / 12;
 
+  const vEmissive = violationEmissive(violation);
   const matProps: MatProps = {
     color: materialColor,
     roughness: comp.type === "shelf" || comp.type === "divider" ? 0.75 : 0.65,
     metalness: 0.05,
-    emissive: isSelected ? "#e8c99a" : "#000000",
-    emissiveIntensity: isSelected ? 0.35 : 0,
+    emissive: vEmissive ? vEmissive.emissive : (isSelected ? "#e8c99a" : "#000000"),
+    emissiveIntensity: vEmissive ? vEmissive.emissiveIntensity : (isSelected ? 0.35 : 0),
   };
 
   const handleClick = (e: ThreeEvent<MouseEvent>) => {
@@ -90,7 +114,12 @@ export function ComponentMesh({
   const handleTransformChange = () => {
     if (!groupRef.current) return;
     const p = groupRef.current.position;
-    onMove(comp.id, [p.x * 12, p.y * 12, p.z * 12]);
+    // Snap to 0.25" grid
+    onMove(comp.id, [
+      snapInch(p.x * 12),
+      snapInch(p.y * 12),
+      snapInch(p.z * 12),
+    ]);
   };
 
   return (
@@ -104,6 +133,7 @@ export function ComponentMesh({
             <meshStandardMaterial {...matProps} />
           </mesh>
         )}
+        {isSelected && <MeasurementLabel w={w} h={h} d={d} />}
       </group>
 
       {isSelected && groupRef.current && (
@@ -120,8 +150,7 @@ export function ComponentMesh({
   );
 }
 
-// ─── Geometry by component type ──────────────────────────────────────────────
-
+// ─── Geometry by type ─────────────────────────────────────────────────────────
 function getGeometry(type: string, w: number, h: number, d: number) {
   switch (type) {
     case "shelf":    return <boxGeometry args={[w, T, d]} />;

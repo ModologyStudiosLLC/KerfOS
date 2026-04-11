@@ -16,16 +16,16 @@ interface CabinetPreviewProps {
   onMove: (id: string, pos: [number, number, number]) => void;
   autoRotate?: boolean;
   viewPreset?: 'perspective' | 'front' | 'top' | 'side';
+  violations?: Record<string, 'critical' | 'warning' | 'info'>;
 }
 
 // ─── Scene ───────────────────────────────────────────────────────────────────
 
-function Scene({ cabinet, material, components, selectedId, onSelect, onMove, autoRotate, viewPreset = 'perspective' }: CabinetPreviewProps) {
+function Scene({ cabinet, material, components, selectedId, onSelect, onMove, autoRotate, viewPreset = 'perspective', violations = {} }: CabinetPreviewProps) {
   const orbitRef = useRef<any>(null);
   const color = getMaterialColor(material?.type);
   const { camera } = useThree();
 
-  // Camera preset switching
   useEffect(() => {
     const h = cabinet.height / 12;
     switch (viewPreset) {
@@ -47,7 +47,6 @@ function Scene({ cabinet, material, components, selectedId, onSelect, onMove, au
       <ambientLight intensity={0.4} />
       <directionalLight position={[5, 10, 7]} intensity={1.2} castShadow shadow-mapSize={[1024, 1024]} />
 
-      {/* All components */}
       {components.map(comp => (
         <ComponentMesh
           key={comp.id}
@@ -57,73 +56,79 @@ function Scene({ cabinet, material, components, selectedId, onSelect, onMove, au
           onSelect={onSelect}
           onMove={onMove}
           orbitRef={orbitRef}
+          violation={violations[comp.id]}
         />
       ))}
 
-      {/* Deselect on canvas background click */}
-      <mesh
-        position={[0, -0.01, 0]}
-        rotation={[-Math.PI / 2, 0, 0]}
-        onClick={() => onSelect(null)}
-        visible={false}
-      >
+      <mesh position={[0, -0.01, 0]} rotation={[-Math.PI / 2, 0, 0]} onClick={() => onSelect(null)} visible={false}>
         <planeGeometry args={[200, 200]} />
         <meshBasicMaterial />
       </mesh>
 
       <Grid
-        position={[0, 0, 0]}
-        args={[20, 20]}
-        cellSize={0.5}
-        cellThickness={0.4}
-        cellColor="#3a2a1a"
-        sectionSize={2}
-        sectionThickness={0.8}
-        sectionColor="#c45d2c22"
-        fadeDistance={18}
-        fadeStrength={1.2}
-        infiniteGrid
+        position={[0, 0, 0]} args={[20, 20]}
+        cellSize={0.5} cellThickness={0.4} cellColor="#3a2a1a"
+        sectionSize={2} sectionThickness={0.8} sectionColor="#c45d2c22"
+        fadeDistance={18} fadeStrength={1.2} infiniteGrid
       />
 
       <OrbitControls
-        ref={orbitRef}
-        makeDefault
-        enableDamping
-        dampingFactor={0.08}
-        minDistance={1}
-        maxDistance={30}
-        maxPolarAngle={Math.PI / 2.05}
-        autoRotate={autoRotate}
-        autoRotateSpeed={0.6}
+        ref={orbitRef} makeDefault enableDamping dampingFactor={0.08}
+        minDistance={1} maxDistance={30} maxPolarAngle={Math.PI / 2.05}
+        autoRotate={autoRotate} autoRotateSpeed={0.6}
       />
 
       <GizmoHelper alignment="bottom-right" margin={[60, 60]}>
-        <GizmoViewport
-          axisColors={["#c45d2c", "#e8c99a", "#888"]}
-          labelColor="#f5f0eb"
-        />
+        <GizmoViewport axisColors={["#c45d2c", "#e8c99a", "#888"]} labelColor="#f5f0eb" />
       </GizmoHelper>
     </>
+  );
+}
+
+// ─── DFM legend ──────────────────────────────────────────────────────────────
+
+function DFMLegend({ violations }: { violations: Record<string, 'critical' | 'warning' | 'info'> }) {
+  const vals = Object.values(violations);
+  if (vals.length === 0) return null;
+  const counts = { critical: 0, warning: 0, info: 0 };
+  for (const v of vals) counts[v]++;
+  return (
+    <div style={{
+      position: 'absolute', top: '16px', left: '50%', transform: 'translateX(-50%)',
+      display: 'flex', gap: '8px', pointerEvents: 'none', zIndex: 10,
+    }}>
+      {counts.critical > 0 && <Chip color="#ef4444" label={`${counts.critical} critical`} />}
+      {counts.warning  > 0 && <Chip color="#f59e0b" label={`${counts.warning} warning`}  />}
+      {counts.info     > 0 && <Chip color="#60a5fa" label={`${counts.info} info`}         />}
+    </div>
+  );
+}
+
+function Chip({ color, label }: { color: string; label: string }) {
+  return (
+    <div style={{
+      padding: '3px 10px', borderRadius: '2px',
+      background: 'rgba(10,14,28,0.85)', backdropFilter: 'blur(8px)',
+      border: `1px solid ${color}40`,
+      fontSize: '10px', fontWeight: 600, color, letterSpacing: '0.04em',
+    }}>{label}</div>
   );
 }
 
 // ─── Export ──────────────────────────────────────────────────────────────────
 
 export default function CabinetPreview(props: CabinetPreviewProps) {
-  const { cabinet } = props;
+  const { cabinet, violations = {} } = props;
   const h = cabinet.height / 12;
 
   return (
     <div style={{ width: "100%", height: "100%", background: "var(--k-canvas-bg)" }}>
-      <Canvas
-        shadows
-        camera={{ position: [h * 1.6, h * 1.2, h * 2.2], fov: 42, near: 0.01, far: 100 }}
-        gl={{ antialias: true }}
-      >
-        <Scene {...props} />
+      <Canvas shadows camera={{ position: [h * 1.6, h * 1.2, h * 2.2], fov: 42, near: 0.01, far: 100 }} gl={{ antialias: true }}>
+        <Scene {...props} violations={violations} />
       </Canvas>
 
-      {/* Dimension overlay */}
+      <DFMLegend violations={violations} />
+
       <div style={{
         position: "absolute", bottom: "16px", left: "16px",
         background: "rgba(26,18,11,0.85)", backdropFilter: "blur(8px)",
