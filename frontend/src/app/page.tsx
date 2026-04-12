@@ -1,8 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
 
 export default function ComingSoon() {
   const [email, setEmail] = useState('')
@@ -15,47 +13,11 @@ export default function ComingSoon() {
 
   return (
     <div style={{
-      minHeight: '100vh',
+      minHeight: 'calc(100vh - 64px)',
       background: 'var(--k-bg)',
       display: 'flex',
       flexDirection: 'column',
     }}>
-      {/* Subtle top accent line */}
-      <div style={{ height: '3px', background: 'var(--k-amber)', flexShrink: 0 }} />
-
-      {/* Nav */}
-      <nav style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 40px',
-        height: '64px',
-        borderBottom: '1px solid var(--k-border)',
-        background: 'var(--k-surface)',
-      }}>
-        <Image
-          src="/kerfos-logo.svg"
-          alt="KerfOS"
-          width={110}
-          height={28}
-          priority
-        />
-        <Link
-          href="/login"
-          style={{
-            fontSize: '13px',
-            color: 'var(--k-ink-2)',
-            textDecoration: 'none',
-            padding: '6px 14px',
-            border: '1px solid var(--k-border-mid)',
-            borderRadius: 'var(--k-r-md)',
-            transition: 'border-color 0.15s, color 0.15s',
-          }}
-        >
-          Sign in
-        </Link>
-      </nav>
-
       {/* Hero */}
       <main style={{
         flex: 1,
