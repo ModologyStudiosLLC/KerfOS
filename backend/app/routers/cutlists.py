@@ -3,18 +3,19 @@ Cut List API Router
 Handles cut list generation and optimization
 """
 
-from fastapi import APIRouter, HTTPException
-from typing import List, Dict
+from fastapi import APIRouter, Depends, HTTPException
+from typing import Any, List, Dict
 from app.cutlist_optimizer import optimize_cut_list
 from app.models import Cabinet, CabinetComponent, CutList, CutItem
 from sqlalchemy.orm import Session
+from app.database import get_db
 
 router = APIRouter(prefix="/api/cutlists", tags=["Cut Lists"])
 
 
 @router.post("/generate")
 async def generate_cut_list(
-    request: Dict[str, any],
+    request: Dict[str, Any],
     db: Session = Depends(get_db)
 ):
     """

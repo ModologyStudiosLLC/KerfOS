@@ -1,9 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20',
-})
+// Created lazily: constructing at module load throws when STRIPE_SECRET_KEY is
+// absent, which breaks `next build` (page-data collection imports this file).
+let _stripe: Stripe | null = null
+function getStripe(): Stripe {
+  if (!_stripe) {
+    const key = process.env.STRIPE_SECRET_KEY
+    if (!key) throw new Error('STRIPE_SECRET_KEY is not configured')
+    _stripe = new Stripe(key, {
+      apiVersion: '2024-06-20' as Stripe.LatestApiVersion, // pinned: webhook payload shapes depend on it
+    })
+  }
+  return _stripe
+}
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
 
@@ -17,7 +27,7 @@ export async function POST(req: NextRequest) {
 
   let event: Stripe.Event
   try {
-    event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
+    event = getStripe().webhooks.constructEvent(body, sig, webhookSecret)
   } catch (err: any) {
     console.error('Webhook signature verification failed:', err.message)
     return NextResponse.json({ error: err.message }, { status: 400 })

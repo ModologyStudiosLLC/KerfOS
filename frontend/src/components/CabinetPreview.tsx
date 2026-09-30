@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, Component, Suspense, type ReactNode } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import { OrbitControls, Grid, Environment, GizmoHelper, GizmoViewport } from "@react-three/drei";
 import * as THREE from "three";
@@ -17,6 +17,22 @@ interface CabinetPreviewProps {
   autoRotate?: boolean;
   viewPreset?: 'perspective' | 'front' | 'top' | 'side';
   violations?: Record<string, 'critical' | 'warning' | 'info'>;
+}
+
+// The studio HDR is fetched from a third-party CDN. If that request fails the
+// error would otherwise unmount the whole builder; the scene has its own
+// lights, so just render without the environment map.
+class OptionalEnvironment extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  componentDidCatch(err: unknown) {
+    console.warn("Environment map failed to load; continuing without it.", err);
+  }
+  render() {
+    return this.state.failed ? null : <Suspense fallback={null}>{this.props.children}</Suspense>;
+  }
 }
 
 // ─── Scene ───────────────────────────────────────────────────────────────────
@@ -43,7 +59,9 @@ function Scene({ cabinet, material, components, selectedId, onSelect, onMove, au
 
   return (
     <>
-      <Environment preset="studio" />
+      <OptionalEnvironment>
+        <Environment preset="studio" />
+      </OptionalEnvironment>
       <ambientLight intensity={0.4} />
       <directionalLight position={[5, 10, 7]} intensity={1.2} castShadow shadow-mapSize={[1024, 1024]} />
 

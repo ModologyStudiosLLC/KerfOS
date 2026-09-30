@@ -1,9 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20',
-})
+// Created lazily: constructing at module load throws when STRIPE_SECRET_KEY is
+// absent, which breaks `next build` (page-data collection imports this file).
+let _stripe: Stripe | null = null
+function getStripe(): Stripe {
+  if (!_stripe) {
+    const key = process.env.STRIPE_SECRET_KEY
+    if (!key) throw new Error('STRIPE_SECRET_KEY is not configured')
+    _stripe = new Stripe(key, {
+      apiVersion: '2024-06-20' as Stripe.LatestApiVersion, // pinned: webhook payload shapes depend on it
+    })
+  }
+  return _stripe
+}
 
 // Server-side price ID map — set these in Vercel env vars
 const PRICE_IDS: Record<string, string | undefined> = {
@@ -33,7 +43,7 @@ export async function POST(req: NextRequest) {
 
     const origin = req.headers.get('origin') || 'https://kerfos.com'
 
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
       mode: 'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: success_url || `${origin}/pricing/success?session_id={CHECKOUT_SESSION_ID}`,

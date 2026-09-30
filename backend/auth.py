@@ -1,55 +1,41 @@
 # Authentication utilities for CutList Cloud
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import Optional
-from jose import JWTError, jwt
-from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 import os
+import uuid
 
 from database import get_db
 from models import User
+import security_core
 
 # Configuration
-JWT_SECRET = os.getenv("JWT_SECRET", "your-secret-key-change-in-production")
-JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 JWT_EXPIRATION_HOURS = int(os.getenv("JWT_EXPIRATION_HOURS", "168"))
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 
 def hash_password(password: str) -> str:
     """Hash a password"""
-    return pwd_context.hash(password)
+    return security_core.hash_password(password)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against a hash"""
-    return pwd_context.verify(plain_password, hashed_password)
+    return security_core.verify_password(plain_password, hashed_password)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     """Create a JWT access token"""
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(hours=JWT_EXPIRATION_HOURS)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, JWT_SECRET, algorithm=JWT_ALGORITHM)
-    return encoded_jwt
+    return security_core.encode_token(data, expires_delta or timedelta(hours=JWT_EXPIRATION_HOURS))
 
 
 def decode_token(token: str) -> Optional[dict]:
     """Decode and validate a JWT token"""
-    try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        return payload
-    except JWTError:
-        return None
+    return security_core.decode_token(token)
 
 
 def get_current_user(
@@ -67,10 +53,11 @@ def get_current_user(
     if payload is None:
         raise credentials_exception
     
-    user_id: str = payload.get("sub")
-    if user_id is None:
+    try:
+        user_id = uuid.UUID(str(payload.get("sub")))
+    except ValueError:
         raise credentials_exception
-    
+
     user = db.query(User).filter(User.id == user_id).first()
     if user is None:
         raise credentials_exception

@@ -8,10 +8,13 @@ from pydantic import BaseModel
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 import httpx
+import logging
 import os
 
 # LLM Provider Configuration
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "openrouter")
+logger = logging.getLogger(__name__)
+
 LLM_API_KEY = os.getenv("LLM_API_KEY", "")
 LLM_MODEL = os.getenv("LLM_MODEL", "z-ai/glm-5-turbo")
 LLM_BASE_URL = {
@@ -99,7 +102,7 @@ def parse_suggested_actions(response_text: str) -> List[str]:
     
     return actions
 
-def call_llm(messages: List[ChatMessage], context: Optional[Dict[str, Any]] = None) -> str:
+async def call_llm(messages: List[ChatMessage], context: Optional[Dict[str, Any]] = None) -> str:
     """Call LLM API to get response"""
     if not LLM_API_KEY:
         raise HTTPException(
@@ -113,6 +116,9 @@ def call_llm(messages: List[ChatMessage], context: Optional[Dict[str, Any]] = No
     }
     
     if LLM_PROVIDER == "anthropic":
+        # Anthropic authenticates with x-api-key, not a Bearer token.
+        del headers["Authorization"]
+        headers["x-api-key"] = LLM_API_KEY
         headers["anthropic-version"] = "2023-06-01"
         # Anthropic format
         api_messages = [{
@@ -155,15 +161,11 @@ def call_llm(messages: List[ChatMessage], context: Optional[Dict[str, Any]] = No
             
             return content
         except httpx.HTTPError as e:
-            raise HTTPException(
-                status_code=500,
-                detail=f"LLM API error: {str(e)}"
-            )
-        except Exception as e:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Failed to call LLM: {str(e)}"
-            )
+            logger.warning("LLM API error: %s", e)
+            raise HTTPException(status_code=502, detail="LLM API error")
+        except Exception:
+            logger.exception("Failed to call LLM")
+            raise HTTPException(status_code=500, detail="Failed to call LLM")
 
 def get_conversation(conversation_id: str) -> List[ChatMessage]:
     """Get conversation history by ID"""
