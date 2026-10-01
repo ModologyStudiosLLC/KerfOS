@@ -47,7 +47,7 @@ STYLE_PRESETS: Dict[str, StylePreset] = {
         },
         features=[
             "Recessed flat center panel",
-            "2.5" stiles and rails",
+            "2.5\" stiles and rails",
             "Square inside edges",
             "Works with any finish"
         ],
@@ -117,7 +117,7 @@ STYLE_PRESETS: Dict[str, StylePreset] = {
         features=[
             "Vertical beadboard center panel",
             "Cottage/country style",
-            "2.5" bead spacing",
+            "2.5\" bead spacing",
             "Great for painted finishes"
         ],
         tags=["cottage", "country", "farmhouse"]
@@ -182,7 +182,7 @@ STYLE_PRESETS: Dict[str, StylePreset] = {
             "drawerOverlay": 0.5
         },
         features=[
-            "1.5" face frame stiles",
+            "1.5\" face frame stiles",
             "Traditional American style",
             "Doors overlay the frame",
             "Easier installation tolerance"

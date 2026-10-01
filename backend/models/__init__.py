@@ -1,6 +1,6 @@
 # Database models for CutList Cloud
 
-from sqlalchemy import Column, String, Boolean, DateTime, Numeric, ForeignKey, Text, Integer
+from sqlalchemy import Column, String, Boolean, DateTime, Numeric, ForeignKey, Text, Integer, JSON
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -85,7 +85,9 @@ class CutList(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     project_id = Column(UUID(as_uuid=True), ForeignKey("projects.id", ondelete="CASCADE"), index=True)
     cabinet_id = Column(UUID(as_uuid=True), ForeignKey("cabinets.id", ondelete="CASCADE"))
-    cuts = Column(JSONB, nullable=False)
+    # JSONB on Postgres (unchanged schema); plain JSON elsewhere so the
+    # models also work on SQLite for tests and local dev.
+    cuts = Column(JSON().with_variant(JSONB(), "postgresql"), nullable=False)
     total_parts = Column(Integer)
     material_cost = Column(Numeric(10, 2))
     generated_at = Column(DateTime, default=datetime.utcnow)

@@ -124,7 +124,7 @@ class DesignDoctor:
                 issues.append(DesignIssue(
                     id=f"shelf_span_{i}",
                     title="Shelf Span Too Wide",
-                    description=f"Shelf {i+1} span ({span:.1f}") exceeds maximum recommended ({max_span}") without support",
+                    description=f"Shelf {i+1} span ({span:.1f}\") exceeds maximum recommended ({max_span}\") without support",
                     severity=IssueSeverity.WARNING if span <= max_span * 1.2 else IssueSeverity.CRITICAL,
                     category=IssueCategory.STRUCTURAL,
                     details={
@@ -141,7 +141,7 @@ class DesignDoctor:
                         ),
                         DesignSuggestion(
                             title="Use thicker material",
-                            description="Switch to 1" thick material or add edge banding for strength",
+                            description="Switch to 1\" thick material or add edge banding for strength",
                             auto_fixable=False
                         )
                     ]
@@ -152,7 +152,7 @@ class DesignDoctor:
             issues.append(DesignIssue(
                 id="tall_cabinet_support",
                 title="Tall Cabinet Needs Support",
-                description=f"Cabinet height ({height}") is over 7 feet and may need additional support",
+                description=f"Cabinet height ({height}\") is over 7 feet and may need additional support",
                 severity=IssueSeverity.WARNING,
                 category=IssueCategory.STRUCTURAL,
                 details={'height': height},
@@ -172,14 +172,14 @@ class DesignDoctor:
                 issues.append(DesignIssue(
                     id="face_frame_thin",
                     title="Face Frame Too Thin",
-                    description="Face frame stiles should be at least 1.5" wide for strength",
+                    description="Face frame stiles should be at least 1.5\" wide for strength",
                     severity=IssueSeverity.WARNING,
                     category=IssueCategory.STRUCTURAL,
                     details={'current_width': face_frame_width},
                     suggestions=[
                         DesignSuggestion(
                             title="Increase face frame width",
-                            description="Set face frame stiles to 1.5" or wider",
+                            description="Set face frame stiles to 1.5\" or wider",
                             auto_fixable=True,
                             fix={'face_frame_width': 1.5}
                         )
@@ -255,7 +255,7 @@ class DesignDoctor:
                 issues.append(DesignIssue(
                     id="appliance_clearance",
                     title="Appliance Garage Too Short",
-                    description=f"Height ({height}") may be too short for your appliances",
+                    description=f"Height ({height}\") may be too short for your appliances",
                     severity=IssueSeverity.WARNING,
                     category=IssueCategory.CLEARANCE,
                     details={'current_height': height, 'recommended_height': min_height},
@@ -292,7 +292,7 @@ class DesignDoctor:
                 issues.append(DesignIssue(
                     id=f"slide_length_{i}",
                     title="Non-Standard Drawer Slide Length",
-                    description=f"Drawer {i+1} slide length ({slide_length}") is not a standard size. Nearest: {nearest}",
+                    description=f"Drawer {i+1} slide length ({slide_length}\") is not a standard size. Nearest: {nearest}",
                     severity=IssueSeverity.INFO,
                     category=IssueCategory.HARDWARE,
                     details={
@@ -302,8 +302,8 @@ class DesignDoctor:
                     },
                     suggestions=[
                         DesignSuggestion(
-                            title=f"Use {nearest}" slides",
-                            description=f"Standard {nearest}" slides are readily available and cost-effective",
+                            title=f"Use {nearest}\" slides",
+                            description=f"Standard {nearest}\" slides are readily available and cost-effective",
                             auto_fixable=True,
                             fix={'drawers': {i: {'slide_length': nearest}}}
                         )
@@ -337,13 +337,13 @@ class DesignDoctor:
             issues.append(DesignIssue(
                 id="lazy_susan_size",
                 title="Check Lazy Susan Size",
-                description=f"Verify lazy susan diameter fits in {width}" corner cabinet",
+                description=f"Verify lazy susan diameter fits in {width}\" corner cabinet",
                 severity=IssueSeverity.INFO,
                 category=IssueCategory.HARDWARE,
                 suggestions=[
                     DesignSuggestion(
                         title="Common lazy susan sizes",
-                        description="26" to 32" diameter lazy susans are common for 36" corner cabinets",
+                        description="26\" to 32\" diameter lazy susans are common for 36\" corner cabinets",
                         auto_fixable=False
                     )
                 ]
@@ -425,13 +425,14 @@ class DesignDoctor:
         issues = []
         height = design.get('height', 0)
         width = design.get('width', 0)
+        depth = design.get('depth', 24)
         
         # Check for tip-over risk on tall cabinets
         if height > 60 and depth < 18:
             issues.append(DesignIssue(
                 id="tip_over_risk",
                 title="Potential Tip-Over Risk",
-                description=f"Tall cabinet ({height}" high) with shallow depth ({depth}") may be unstable",
+                description=f"Tall cabinet ({height}\" high) with shallow depth ({depth}\") may be unstable",
                 severity=IssueSeverity.CRITICAL,
                 category=IssueCategory.SAFETY,
                 details={'height': height, 'depth': depth},
@@ -455,7 +456,7 @@ class DesignDoctor:
             issues.append(DesignIssue(
                 id="wall_cabinet_height",
                 title="Very Tall Wall Cabinet",
-                description=f"Wall cabinet height ({height}") is taller than standard (30-42")",
+                description=f"Wall cabinet height ({height}\") is taller than standard (30-42\")",
                 severity=IssueSeverity.WARNING,
                 category=IssueCategory.SAFETY,
                 suggestions=[
@@ -506,7 +507,7 @@ class DesignDoctor:
                     suggestions=[
                         DesignSuggestion(
                             title="Make doors equal width",
-                            description=f"Set both doors to {width/2:.2f}" wide",
+                            description=f"Set both doors to {width/2:.2f}\" wide",
                             auto_fixable=True,
                             fix={'doors': [{}, {}]}  # Would need actual implementation
                         )
@@ -528,7 +529,7 @@ class DesignDoctor:
                     suggestions=[
                         DesignSuggestion(
                             title="Use standard progression",
-                            description="Top: 5", Middle: 7", Bottom: 9" for a 3-drawer stack",
+                            description="Top: 5\", Middle: 7\", Bottom: 9\" for a 3-drawer stack",
                             auto_fixable=False
                         )
                     ]

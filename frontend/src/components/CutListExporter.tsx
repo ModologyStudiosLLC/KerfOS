@@ -44,7 +44,7 @@ export default function CutListExporter({
       setError(null);
 
       // TODO: Update this URL when backend is deployed
-      const response = await fetch("http://localhost:8000/api/cutlists/generate", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/cutlists/generate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -105,7 +105,7 @@ export default function CutListExporter({
 
     // Generate G-code from cut list
     try {
-      const response = await fetch("http://localhost:8000/api/gcode", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/gcode`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
