@@ -1,0 +1,12 @@
+# KerfOS assistant agent (CopilotKit + LangGraph). Python 3.12+
+langchain==1.4.4
+langgraph==1.2.14
+copilotkit==0.1.96
+ag-ui-langgraph==0.0.47
+deepagents==0.7.23
+langchain-anthropic==1.7.5
+fastapi>=0.115.5,<1.0.0
+uvicorn>=0.29.0,<1.0.0
+python-dotenv>=1.0.0,<2.0.0
+httpx>=0.28,<1
+pytest>=9.0.3
