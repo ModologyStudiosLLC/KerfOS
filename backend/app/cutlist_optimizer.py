@@ -7,13 +7,18 @@ from typing import List, Dict, Tuple, Optional
 from dataclasses import dataclass
 from enum import Enum
 
+from rectpack import newPacker, PackingMode, PackingBin, GuillotineBssfSas
+
+# rectpack works on integers, so dimensions are scaled to thousandths of an inch
+_SCALE = 1000
+
 
 class SheetSize(Enum):
     """Standard plywood/sheet good sizes"""
-    FULL_4X8 = (96, 96)  # 4' x 8' (most common)
-    HALF_4X4 = (48, 96)  # 4' x 8' (half sheet)
-    QUARTER_2X4 = (24, 96)  # 2' x 8' (quarter sheet)
-    EURO_4X8 = (120, 240)  # 1.2m x 2.4m (European)
+    FULL_4X8 = (48, 96)  # 4' x 8' (most common)
+    HALF_4X4 = (48, 48)  # 4' x 4'
+    QUARTER_2X4 = (24, 48)  # 2' x 4'
+    EURO_4X8 = (48.03, 96.06)  # 1220mm x 2440mm, in inches
 
 
 @dataclass
@@ -64,8 +69,9 @@ class OptimizationResult:
 class CutListOptimizer:
     """Main optimizer class using 2D bin packing"""
     
-    def __init__(self, sheet_size: SheetSize = SheetSize.FULL_4X8):
+    def __init__(self, sheet_size: SheetSize = SheetSize.FULL_4X8, allow_rotation: bool = True):
         self.sheet_size = sheet_size
+        self.allow_rotation = allow_rotation
         self.sheet_width, self.sheet_height = sheet_size.value
         self.sheets: List[CutSheet] = []
         self.current_sheet: Optional[CutSheet] = None
@@ -106,29 +112,41 @@ class CutListOptimizer:
         return result
     
     def _pack_items(self, items: List[CutItem]) -> None:
-        """Pack items into sheets using first-fit algorithm"""
-        
-        for item in items:
-            packed = False
-            
-            # Try to fit into existing sheets
-            for sheet in self.sheets:
-                if self._try_fit_item(sheet, item):
-                    packed = True
-                    break
-            
-            # If didn't fit, create new sheet
-            if not packed:
-                self._add_new_sheet()
-                if not self._try_fit_item(self.sheets[-1], item):
-                    # Try rotation if normal fit failed
-                    if self._try_fit_with_rotation(self.sheets[-1], item):
-                        packed = True
-            
-            if not packed:
-                # Item too large for sheet - this shouldn't happen with typical cabinets
-                raise ValueError(f"Item {item.part_name} ({item.width}x{item.height}) too large for sheet ({self.sheet_width}x{self.sheet_height})")
-    
+        """Pack items into sheets with rectpack (guillotine cuts, rotation allowed)"""
+
+        packer = newPacker(
+            mode=PackingMode.Offline,
+            bin_algo=PackingBin.BBF,
+            pack_algo=GuillotineBssfSas,
+            rotation=self.allow_rotation,
+        )
+        packer.add_bin(
+            round(self.sheet_width * _SCALE), round(self.sheet_height * _SCALE), count=float("inf")
+        )
+        for idx, item in enumerate(items):
+            packer.add_rect(round(item.width * _SCALE), round(item.height * _SCALE), rid=idx)
+        packer.pack()
+
+        placed = packer.rect_list()
+        if len(placed) < len(items):
+            placed_ids = {rid for *_, rid in placed}
+            missing = next(items[i] for i in range(len(items)) if i not in placed_ids)
+            raise ValueError(f"Item {missing.part_name} ({missing.width}x{missing.height}) too large for sheet ({self.sheet_width}x{self.sheet_height})")
+
+        sheets_by_bin: Dict[int, CutSheet] = {}
+        for bin_idx, x, y, w, h, rid in sorted(placed, key=lambda r: (r[0], r[2], r[1])):
+            if bin_idx not in sheets_by_bin:
+                sheets_by_bin[bin_idx] = CutSheet(
+                    sheet_number=len(sheets_by_bin) + 1,
+                    width=self.sheet_width,
+                    height=self.sheet_height,
+                    cuts=[],
+                )
+            item = items[rid]
+            item.rotation = (w, h) != (round(item.width * _SCALE), round(item.height * _SCALE))
+            self._place_item(sheets_by_bin[bin_idx], item, x / _SCALE, y / _SCALE, w / _SCALE, h / _SCALE)
+        self.sheets = list(sheets_by_bin.values())
+
     def _try_fit_item(self, sheet: CutSheet, item: CutItem) -> bool:
         """Try to place item at first available position on sheet"""
         
@@ -262,13 +280,15 @@ class CutListOptimizer:
         )
 
 
-def optimize_cut_list(components: List[Dict], sheet_size: str = "4x8") -> Dict:
+def optimize_cut_list(components: List[Dict], sheet_size: str = "4x8", allow_rotation: bool = True) -> Dict:
     """
     Convenience function to optimize cut list from component dictionaries
     
     Args:
         components: List of component dicts with id, name, width, height, quantity, material_id
         sheet_size: Size of sheet material ("4x8", "4x4", "2x4", "euro")
+        allow_rotation: Set False to keep every part's given orientation (grain direction).
+            Part width runs across the sheet, part height runs along the sheet length.
         
     Returns:
         Dict with optimized cut list and statistics
@@ -296,7 +316,7 @@ def optimize_cut_list(components: List[Dict], sheet_size: str = "4x8") -> Dict:
     ]
     
     # Optimize
-    optimizer = CutListOptimizer(sheet_size=sheet_size_enum)
+    optimizer = CutListOptimizer(sheet_size=sheet_size_enum, allow_rotation=allow_rotation)
     result = optimizer.optimize(component_objs)
     
     # Format result for API
@@ -320,8 +340,18 @@ def optimize_cut_list(components: List[Dict], sheet_size: str = "4x8") -> Dict:
         for sheet in result.sheets
     ]
     
+    # Same sheets in the shape GCodeGenerator.generate() expects
+    layout = [
+        {
+            "sheet": {"width": s["width"], "length": s["height"], "material": components[0]["material_id"] if components else ""},
+            "parts": [{**c, "name": c["part_name"]} for c in s["cuts"]],
+        }
+        for s in sheets
+    ]
+
     return {
         "cut_list": sheets,
+        "layout": layout,
         "waste_percentage": result.waste_percentage,
         "total_sheets": result.total_sheets,
         "used_area": result.used_area,
