@@ -69,10 +69,12 @@ class OptimizationResult:
 class CutListOptimizer:
     """Main optimizer class using 2D bin packing"""
     
-    def __init__(self, sheet_size: SheetSize = SheetSize.FULL_4X8, allow_rotation: bool = True):
+    def __init__(self, sheet_size: SheetSize = SheetSize.FULL_4X8, allow_rotation: bool = True,
+                 sheet_dims: Optional[Tuple[float, float]] = None):
         self.sheet_size = sheet_size
         self.allow_rotation = allow_rotation
-        self.sheet_width, self.sheet_height = sheet_size.value
+        # sheet_dims (width, height in inches) overrides sheet_size for non-standard sheets
+        self.sheet_width, self.sheet_height = sheet_dims or sheet_size.value
         self.sheets: List[CutSheet] = []
         self.current_sheet: Optional[CutSheet] = None
     
