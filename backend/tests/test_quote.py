@@ -52,3 +52,11 @@ def test_quote_rejects_part_larger_than_a_sheet():
 def test_quote_rejects_unknown_material():
     r = client.post("/api/quote", json=[{"name": "X", "width": 10, "height": 10, "qty": 1, "material_id": "nope"}])
     assert r.status_code == 400
+
+
+def test_quote_rejects_unreasonable_sizes():
+    mid = _sheet_material_id()
+    assert client.post("/api/quote", json=[{"name": "A", "width": 10, "height": 10, "qty": 100000, "material_id": mid}]).status_code == 422
+    assert client.post("/api/quote", json=[{"name": "A", "width": 99999, "height": 10, "qty": 1, "material_id": mid}]).status_code == 422
+    too_many = [{"name": "A", "width": 10, "height": 10, "qty": 1, "material_id": mid}] * 101
+    assert client.post("/api/quote", json=too_many).status_code == 400

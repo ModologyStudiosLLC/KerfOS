@@ -1,11 +1,13 @@
 """KerfOS assistant: a CopilotKit/LangGraph agent that answers with real KerfOS quote data."""
+import hmac
 import os
 
 from ag_ui_langgraph import add_langgraph_fastapi_endpoint
 from copilotkit import CopilotKitMiddleware, LangGraphAGUIAgent
 from deepagents import create_deep_agent
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from langchain_anthropic import ChatAnthropic
 from langgraph.checkpoint.memory import MemorySaver
 
@@ -28,6 +30,20 @@ agent = create_deep_agent(
 )
 
 app = FastAPI()
+
+# Only the KerfOS Next.js route may call this service. Fail closed if no secret is configured.
+AGENT_SHARED_SECRET = os.environ.get("AGENT_SHARED_SECRET", "")
+if len(AGENT_SHARED_SECRET) < 32:
+    raise RuntimeError("AGENT_SHARED_SECRET must be set to a random string of at least 32 characters.")
+
+
+@app.middleware("http")
+async def require_shared_secret(request: Request, call_next):
+    if request.url.path != "/health":
+        supplied = request.headers.get("x-agent-secret", "")
+        if not hmac.compare_digest(supplied.encode(), AGENT_SHARED_SECRET.encode()):
+            return JSONResponse({"detail": "Unauthorized"}, status_code=401)
+    return await call_next(request)
 
 
 @app.get("/health")

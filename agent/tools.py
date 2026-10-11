@@ -6,6 +6,8 @@ from langchain_core.tools import tool
 
 KERFOS_API_URL = os.environ.get("KERFOS_API_URL", "http://localhost:8000")
 PLY = 0.75  # carcass material thickness, inches
+MAX_DIMENSION = 120.0  # inches; a cabinet bigger than this is almost certainly a prompt or typo problem
+MAX_COUNT = 50
 
 
 def base_cabinet_parts(width: float, height: float, depth: float, material_id: str) -> list[dict]:
@@ -39,6 +41,10 @@ def quote_base_cabinet(width: float, height: float, depth: float, material_id: s
     Assumes 3/4" material, two sides, a bottom, two 3" stretchers and a back. Returns sheets needed,
     subtotal, tax and total from the KerfOS backend.
     """
+    if not all(0 < d <= MAX_DIMENSION for d in (width, height, depth)) or width <= 2 * PLY:
+        return {"error": f"Dimensions must be between 0 and {MAX_DIMENSION:.0f} inches (width over 1.5)."}
+    if not 1 <= count <= MAX_COUNT:
+        return {"error": f"Count must be between 1 and {MAX_COUNT}."}
     parts = base_cabinet_parts(width, height, depth, material_id)
     for p in parts:
         p["qty"] *= count

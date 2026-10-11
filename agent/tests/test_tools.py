@@ -9,3 +9,12 @@ def test_base_cabinet_parts_match_standard_carcass():
     assert parts["Bottom"]["width"] == pytest.approx(22.5)
     assert parts["Back"]["height"] == pytest.approx(33.75)
     assert sum(p["qty"] for p in parts.values()) == 6
+
+
+def test_quote_tool_rejects_oversize_inputs_without_calling_the_backend():
+    from tools import quote_base_cabinet
+
+    too_big = quote_base_cabinet.invoke({"width": 24, "height": 34.5, "depth": 23.25, "material_id": "x", "count": 100000})
+    assert "error" in too_big
+    huge = quote_base_cabinet.invoke({"width": 5000, "height": 34.5, "depth": 23.25, "material_id": "x"})
+    assert "error" in huge
