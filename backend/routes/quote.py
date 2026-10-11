@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from app.cutlist_optimizer import CutListOptimizer, Component
 from .materials import CATALOG
@@ -32,11 +32,11 @@ def _sheets_needed(parts: list[dict], sheet_w: float, sheet_h: float) -> int:
 
 
 class PartIn(BaseModel):
-    name: str
-    width: float    # inches
-    height: float   # inches
-    qty: int = 1
-    material_id: str
+    name: str = Field(max_length=100)
+    width: float = Field(gt=0, le=240)    # inches
+    height: float = Field(gt=0, le=240)   # inches
+    qty: int = Field(default=1, ge=1, le=500)
+    material_id: str = Field(max_length=100)
 
 
 class LineItemOut(BaseModel):
@@ -62,8 +62,8 @@ class QuoteResponse(BaseModel):
 
 @router.post("", response_model=QuoteResponse)
 async def instant_quote(parts: list[PartIn], tax_rate: Optional[float] = None):
-    if not parts:
-        raise HTTPException(status_code=400, detail="No parts provided")
+    if not parts or len(parts) > 100:
+        raise HTTPException(status_code=400, detail="Provide between 1 and 100 parts")
 
     tax_rate = tax_rate if tax_rate is not None else DEFAULT_TAX
 
